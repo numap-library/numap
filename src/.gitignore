@@ -1,0 +1,4 @@
+*.o
+overhead
+libnumap.so
+libnumap.a
