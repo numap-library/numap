@@ -1,4 +1,4 @@
-# numap library
+## Overview
 
 numap is a Linux library dedicated to memory profiling based on
 hardware performance monitoring unit (PMU). The main objective for the
