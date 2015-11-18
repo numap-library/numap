@@ -24,7 +24,7 @@ struct archi {
   const char *sampling_write_event;
 };
 
-#define NB_SUPPORTED_ARCHS 7
+#define NB_SUPPORTED_ARCHS 8
 
 struct archi Xeon_E_7450 = { .id = 0x06 | 0x1D << 8, // 06_29
 			     .name = "Xeon_E_7450 based on Penryn micro arch - Dunnington decline",
@@ -83,6 +83,7 @@ static struct archi *supported_archs[NB_SUPPORTED_ARCHS] = {
   &WESTMERE_EP,
   &Xeon_E5_2670,
   &I5_2520,
+  &Xeon_E5_2660,
   &I7_3770,
   &I7_5960X};
 
