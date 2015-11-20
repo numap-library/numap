@@ -60,7 +60,9 @@ struct archi I5_2520 = { .id = 0x06 | 0x2A << 8, // 06_42
 
 struct archi Xeon_E5_2660 = { .id = 0x06 | 0x3E << 8, // 06_62
 			 .name = "Xeon_E5_2660 based on Ivy Bridge micro arch - Ivy Bridge-E decline - 3rd generation Intel Core",
-			 .sampling_read_event= "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
+			 // NOTE in the Intel SDM it's named MEM_TRANS_RETIRED:LOAD_LATENCY
+			 // but the number correspond with  the one returned pfmlib
+			 .sampling_read_event= "MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
 			 .sampling_write_event="MEM_TRANS_RETIRED:PRECISE_STORE"
 };
 
