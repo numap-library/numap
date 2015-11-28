@@ -36,3 +36,4 @@ The memory bandwidth abstraction is based on hardware counters at
 ## Dependencies
 
 - libpfm4
+- libnuma
