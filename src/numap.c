@@ -154,9 +154,9 @@ __attribute__((constructor)) void init(void) {
   }
   free(arg);
   fclose(cpuinfo);
-//  fprintf(stderr, "family=%u, model=%u\n", family, model);
+  fprintf(stderr, "family=%u, model=%u\n", family, model);
   current_archi = get_archi(family | model << 8);
-//  fprintf(stderr, "family=%u, model=%u\n", get_family(current_archi->id), get_model(current_archi->id));
+  fprintf(stderr, "family=%u, model=%u\n", get_family(current_archi->id), get_model(current_archi->id));
 
   // Get numa configuration
   int available = numa_available();
