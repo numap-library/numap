@@ -451,17 +451,8 @@ int __numap_sampling_start(struct numap_sampling_measure *measure, struct perf_e
 }
 
 int numap_sampling_read_start(struct numap_sampling_measure *measure) {
-
-  /* // Bull's Westmere EP */
-  /* if (family == 6 && model == 44) { */
-  /*   pe_attr.type = PERF_TYPE_RAW; */
-  /*   pe_attr.config1 = 3; */
-  /*   pe_attr.config = 0x100b; // MEM_INST_RETIRED.LATENCY_ABOVE_THRESHOLD */
-  /* } */
-
-  /**
-   * Set attribute parameter for perf_event_open using pfmlib
-   */
+  
+  // Set attribute parameter for perf_event_open using pfmlib
   struct perf_event_attr pe_attr;
   memset(&pe_attr, 0, sizeof(pe_attr));
   pe_attr.size = sizeof(pe_attr);
@@ -475,7 +466,6 @@ int numap_sampling_read_start(struct numap_sampling_measure *measure) {
   if (curr_err != PFM_SUCCESS) {
     return ERROR_PFM;
   }
-  printf("PE: config = %" PRIx64 ", config1 = %" PRIx64 ", precise = %d\n", pe_attr.config, pe_attr.config1, pe_attr.precise_ip);
 
   // Sampling parameters
   pe_attr.sample_period = measure->sampling_rate;
@@ -489,6 +479,8 @@ int numap_sampling_read_start(struct numap_sampling_measure *measure) {
   pe_attr.exclude_kernel = 1;
   pe_attr.exclude_hv = 1;
 
+  //printf("PE: config = %" PRIx64 ", config1 = %" PRIx64 ", precise = %d\n", pe_attr.config, pe_attr.config1, pe_attr.precise_ip);
+  
   return __numap_sampling_start(measure, &pe_attr);
 }
 
@@ -510,9 +502,7 @@ int numap_sampling_read_stop(struct numap_sampling_measure *measure) {
 
 int numap_sampling_write_start(struct numap_sampling_measure *measure) {
 
-  /**
-   * Set attribute parameter for perf_event_open using pfmlib
-   */
+  // Set attribute parameter for perf_event_open using pfmlib
   struct perf_event_attr pe_attr;
   memset(&pe_attr, 0, sizeof(pe_attr));
   pe_attr.size = sizeof(pe_attr);
@@ -538,9 +528,6 @@ int numap_sampling_write_start(struct numap_sampling_measure *measure) {
   pe_attr.disabled = 1;
   pe_attr.exclude_kernel = 1;
   pe_attr.exclude_hv = 1;
-
-//    printf("PE: config = %" PRIx64 ", config1 = %" PRIx64 ", precise = %d, sample_type= %" PRIx64 "\n", pe_attr.config, pe_attr.config1, pe_attr.precise_ip, pe_attr.sample_type);
-
 
   return __numap_sampling_start(measure, &pe_attr);
 }
