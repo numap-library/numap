@@ -154,9 +154,8 @@ __attribute__((constructor)) void init(void) {
   }
   free(arg);
   fclose(cpuinfo);
-  fprintf(stderr, "family=%u, model=%u\n", family, model);
   current_archi = get_archi(family | model << 8);
-  fprintf(stderr, "family=%u, model=%u\n", get_family(current_archi->id), get_model(current_archi->id));
+  //fprintf(stderr, "family=%u, model=%u\n", get_family(current_archi->id), get_model(current_archi->id));
 
   // Get numa configuration
   int available = numa_available();
@@ -476,7 +475,7 @@ int numap_sampling_read_start(struct numap_sampling_measure *measure) {
   if (curr_err != PFM_SUCCESS) {
     return ERROR_PFM;
   }
-//  printf("PE: config = %" PRIx64 ", config1 = %" PRIx64 ", precise = %d\n", pe_attr.config, pe_attr.config1, pe_attr.precise_ip);
+  printf("PE: config = %" PRIx64 ", config1 = %" PRIx64 ", precise = %d\n", pe_attr.config, pe_attr.config1, pe_attr.precise_ip);
 
   // Sampling parameters
   pe_attr.sample_period = measure->sampling_rate;
