@@ -8,7 +8,7 @@ all:
 
 install: 
 	cp -f include/numap.h /usr/include/.
-	cp -f numap.so /usr/lib/. 
+	cp -f libnumap.so /usr/lib/. 
 
 clean:
 	$(MAKE) -C src clean
