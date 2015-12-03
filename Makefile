@@ -6,6 +6,10 @@ all:
 	$(MAKE) -C src
 	$(MAKE) -C examples
 
+install: 
+	cp -f include/numap.h /usr/include/.
+	cp -f numap.so /usr/lib/. 
+
 clean:
 	$(MAKE) -C src clean
 	$(MAKE) -C examples clean
