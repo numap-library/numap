@@ -24,7 +24,7 @@ struct archi {
   const char *sampling_write_event;
 };
 
-#define NB_SUPPORTED_ARCHS 8
+#define NB_SUPPORTED_ARCHS 9
 
 struct archi Xeon_E_7450 = { .id = 0x06 | 0x1D << 8, // 06_29
 			     .name = "Xeon_E_7450 based on Penryn micro arch - Dunnington decline",
@@ -78,6 +78,12 @@ struct archi I7_5960X = { .id = 0x06 | 0x3F << 8, // 06_63
 			  .sampling_write_event="MEM_UOPS_RETIRED:ALL_STORES"
 };
 
+struct archi I5_4670 = { .id = 0x06 | 0x3C << 8, // 06_60
+			  .name = "I5-4670 based on Haswell micro arch - Haswell-DT decline - 4th generation Intel Core",
+			  .sampling_read_event= "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
+			  .sampling_write_event="MEM_UOPS_RETIRED:ALL_STORES"
+};
+
 
 static struct archi *supported_archs[NB_SUPPORTED_ARCHS] = {
   &Xeon_E_7450,
@@ -87,7 +93,8 @@ static struct archi *supported_archs[NB_SUPPORTED_ARCHS] = {
   &I5_2520,
   &Xeon_E5_2660,
   &I7_3770,
-  &I7_5960X};
+  &I7_5960X,
+  &I5_4670};
 
 static struct archi * get_archi(unsigned int archi_id) {
   int i;
