@@ -6,7 +6,7 @@ all:
 	$(MAKE) -C src
 	$(MAKE) -C examples
 
-install: 
+install: all
 	cp -f include/numap.h /usr/include/.
 	cp -f libnumap.so /usr/lib/. 
 
