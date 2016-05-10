@@ -171,15 +171,16 @@ __attribute__((constructor)) void init(void) {
   } else {
     nb_numa_nodes = numa_num_configured_nodes();
     int nb_cpus = numa_num_configured_cpus();
-    struct bitmask *mask = numa_bitmask_alloc(nb_cpus);
     for (node = 0; node < nb_numa_nodes; node++) {
+	  struct bitmask *mask = numa_bitmask_alloc(nb_cpus);
       numa_node_to_cpus(node, mask);
       numa_node_to_cpu[node] = -1;
       for (cpu = 0; cpu < nb_cpus; cpu++) {
-	if (*(mask->maskp) & (1 << cpu)) {
-	  numa_node_to_cpu[node] = cpu;
-	  break;
-	}
+		if (*(mask->maskp) & (1 << cpu)) {
+		  numa_node_to_cpu[node] = cpu;
+		  numa_bitmask_free(mask);
+		  break;
+		}
       }
       if (numa_node_to_cpu[node] == -1) {
 	nb_numa_nodes = -1; // to be handled properly
