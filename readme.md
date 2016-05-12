@@ -21,7 +21,7 @@ The memory bandwidth abstraction is based on hardware counters at
 - Intel I5_2520 (06_42)
 - I7_3770 (06_58)
 - I7_5960X (06_63)
-- I5-4670 (06_0)
+- I5-4670 (06_60)
 
 ## Folders Organization
 
