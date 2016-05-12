@@ -19,9 +19,9 @@ The memory bandwidth abstraction is based on hardware counters at
 - Intel WESTMERE_EP (06_44)
 - Intel Xeon_E5_2670 (06_45)
 - Intel I5_2520 (06_42)
-- I7_3770 (06_58)
-- I7_5960X (06_63)
-- I5-4670 (06_60)
+- Intel I7_3770 (06_58)
+- Intel I7_5960X (06_63)
+- Intel I5-4670 (06_60)
 
 ## Folders Organization
 
