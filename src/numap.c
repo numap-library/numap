@@ -24,7 +24,14 @@ struct archi {
   const char *sampling_write_event;
 };
 
-#define NB_SUPPORTED_ARCHS 9
+#define NB_SUPPORTED_ARCHS 10
+
+struct archi Xeon_X_5570 = { .id = 0x06 | 0x1A << 8, // 06_26
+			     .name = "Xeon_X_5570 based on Nehalem micro arch - Gainestown decline",
+			     .sampling_read_event= "MEM_INST_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
+			     .sampling_write_event="NOT_SUPPORTED"
+};
+
 
 struct archi Xeon_E_7450 = { .id = 0x06 | 0x1D << 8, // 06_29
 			     .name = "Xeon_E_7450 based on Penryn micro arch - Dunnington decline",
@@ -86,6 +93,7 @@ struct archi I5_4670 = { .id = 0x06 | 0x3C << 8, // 06_60
 
 
 static struct archi *supported_archs[NB_SUPPORTED_ARCHS] = {
+  &Xeon_X_5570,
   &Xeon_E_7450,
   &I7_870,
   &WESTMERE_EP,
