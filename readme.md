@@ -23,6 +23,9 @@ The memory bandwidth abstraction is based on hardware counters at
 - Intel I7_5960X (06_63)
 - Intel I5-4670 (06_60)
 
+## Processors whose integration is ongoing
+- Intel Xeon X5570 (06_26)
+
 ## Folders Organization
 
 - *examples*: contains some examples showing how to use numap. One of
