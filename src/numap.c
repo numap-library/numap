@@ -22,6 +22,8 @@ struct archi {
   const char *name;
   const char *sampling_read_event;
   const char *sampling_write_event;
+  const char *counting_read_event;
+  const char *counting_write_event;
 };
 
 #define NB_SUPPORTED_ARCHS 9
@@ -29,25 +31,33 @@ struct archi {
 struct archi Xeon_E_7450 = { .id = 0x06 | 0x1D << 8, // 06_29
 			     .name = "Xeon_E_7450 based on Penryn micro arch - Dunnington decline",
 			     .sampling_read_event= "NOT_SUPPORTED",
-			     .sampling_write_event="NOT_SUPPORTED"
+			     .sampling_write_event="NOT_SUPPORTED",
+			     .counting_read_event="NOT_SUPPORTED",
+			     .counting_write_event="NOT_SUPPORTED"
 };
 
 struct archi I7_870 = { .id = 0x06 | 0x1E << 8, // 06_30
 			.name = "I7_870 based on Nehalem micro arch - Lynfield decline",
 			.sampling_read_event= "MEM_INST_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
-			.sampling_write_event="NOT_SUPPORTED"
+			.sampling_write_event="NOT_SUPPORTED",
+			.counting_read_event="NOT_SUPPORTED",
+			.counting_write_event="NOT_SUPPORTED"
 };
 
 struct archi WESTMERE_EP = { .id = 0x06 | 0x2C << 8, // O6_44
 			     .name = "Westmere-Ep",
 			     .sampling_read_event= "MEM_INST_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
-			     .sampling_write_event="NOT_SUPPORTED"
+			     .sampling_write_event="NOT_SUPPORTED",
+			     .counting_read_event="NOT_SUPPORTED",
+			     .counting_write_event="NOT_SUPPORTED"
 };
 
 struct archi Xeon_E5_2670 = { .id = 0x06 | 0x2D << 8, // 06_45
 			      .name = "Xeon E5-2670 based on Sandy Bridge micro arch - Sandy Bridge-EP decline",
 			      .sampling_read_event= "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
-			      .sampling_write_event="MEM_TRANS_RETIRED:PRECISE_STORE"
+			      .sampling_write_event="MEM_TRANS_RETIRED:PRECISE_STORE",
+			      .counting_read_event="NOT_SUPPORTED",
+			      .counting_write_event="NOT_SUPPORTED"
 };
 
 struct archi I5_2520 = { .id = 0x06 | 0x2A << 8, // 06_42
@@ -55,7 +65,9 @@ struct archi I5_2520 = { .id = 0x06 | 0x2A << 8, // 06_42
 			 // NOTE in the Intel SDM it's named MEM_TRANS_RETIRED:LOAD_LATENCY
 			 // but the number correspond with  the one returned pfmlib
 			 .sampling_read_event= "MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
-			 .sampling_write_event="MEM_TRANS_RETIRED:PRECISE_STORE"
+			 .sampling_write_event="MEM_TRANS_RETIRED:PRECISE_STORE",
+			 .counting_read_event="NOT_SUPPORTED",
+			 .counting_write_event="NOT_SUPPORTED"
 };
 
 struct archi Xeon_E5_2660 = { .id = 0x06 | 0x3E << 8, // 06_62
@@ -63,25 +75,33 @@ struct archi Xeon_E5_2660 = { .id = 0x06 | 0x3E << 8, // 06_62
 			 // NOTE in the Intel SDM it's named MEM_TRANS_RETIRED:LOAD_LATENCY
 			 // but the number correspond with  the one returned pfmlib
 			 .sampling_read_event= "MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
-			 .sampling_write_event="MEM_TRANS_RETIRED:PRECISE_STORE"
+			 .sampling_write_event="MEM_TRANS_RETIRED:PRECISE_STORE",
+			 .counting_read_event="NOT_SUPPORTED",
+			 .counting_write_event="NOT_SUPPORTED"
 };
 
 struct archi I7_3770 = { .id = 0x06 | 0x3A << 8, // 06_58
 			 .name = "I7_3770 based on Ivy Bridge micro arch - Ivy Bridge decline - 3rd generation Intel Core",
 			 .sampling_read_event= "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
-			 .sampling_write_event="MEM_TRANS_RETIRED:PRECISE_STORE"
+			 .sampling_write_event="MEM_TRANS_RETIRED:PRECISE_STORE",
+			 .counting_read_event="NOT_SUPPORTED",
+			 .counting_write_event="NOT_SUPPORTED"
 };
 
 struct archi I7_5960X = { .id = 0x06 | 0x3F << 8, // 06_63
 			  .name = "I7_5960X based on Haswell micro arch - Haswell-E decline - 4th generation Intel Core",
 			  .sampling_read_event= "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
-			  .sampling_write_event="MEM_UOPS_RETIRED:ALL_STORES"
+			  .sampling_write_event="MEM_UOPS_RETIRED:ALL_STORES",
+			  .counting_read_event="NOT_SUPPORTED",
+			  .counting_write_event="NOT_SUPPORTED"
 };
 
 struct archi I5_4670 = { .id = 0x06 | 0x3C << 8, // 06_60
-			  .name = "I5-4670 based on Haswell micro arch - Haswell-DT decline - 4th generation Intel Core",
-			  .sampling_read_event= "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
-			  .sampling_write_event="MEM_UOPS_RETIRED:ALL_STORES"
+			 .name = "I5-4670 based on Haswell micro arch - Haswell-DT decline - 4th generation Intel Core",
+			 .sampling_read_event= "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
+			 .sampling_write_event="MEM_UOPS_RETIRED:ALL_STORES",
+			 .counting_read_event="NOT_SUPPORTED",
+			 .counting_write_event="NOT_SUPPORTED"
 };
 
 
@@ -106,11 +126,11 @@ static struct archi * get_archi(unsigned int archi_id) {
   return NULL;
 }
 
-static unsigned char get_family(unsigned int archi_id) {
+unsigned char get_family(unsigned int archi_id) {
   return (archi_id >> (8*0)) & 0xff;
 }
 
-static unsigned char get_model(unsigned int archi_id) {
+unsigned char get_model(unsigned int archi_id) {
   return (archi_id >> (8*1)) & 0xff;
 }
 
@@ -162,7 +182,6 @@ __attribute__((constructor)) void init(void) {
   free(arg);
   fclose(cpuinfo);
   current_archi = get_archi(family | model << 8);
-  //fprintf(stderr, "family=%u, model=%u\n", get_family(current_archi->id), get_model(current_archi->id));
 
   // Get numa configuration
   int available = numa_available();
@@ -219,13 +238,13 @@ const char *numap_error_message(int error) {
   char *pe_error = "perf_event ==> ";
   char *pfm_error = "pfm ==> ";
   switch (error) {
-  case ERROR_NUMEMP_NOT_NUMA:
+  case ERROR_NUMAP_NOT_NUMA:
     return "libnumap: numa lib not available";
-  case ERROR_NUMEMP_STOP_BEFORE_START:
+  case ERROR_NUMAP_STOP_BEFORE_START:
     return "libnumap: stop called before start";
-  case ERROR_NUMEMP_ALREADY_STARTED:
+  case ERROR_NUMAP_ALREADY_STARTED:
     return "libnumap: start called again before stop";
-  case ERROR_NUMEMP_ARCH_NOT_SUPPORTED:
+  case ERROR_NUMAP_ARCH_NOT_SUPPORTED:
     return concat("libnumap: architecture not supported: ", model_name);
   case ERROR_PERF_EVENT_OPEN:
     return concat(pe_error, strerror(errno));
@@ -241,11 +260,11 @@ const char *numap_error_message(int error) {
 int numap_init(void) {
 
   if (nb_numa_nodes == -1) {
-    return ERROR_NUMEMP_NOT_NUMA;
+    return ERROR_NUMAP_NOT_NUMA;
   }
 
   if (current_archi == NULL) {
-    return ERROR_NUMEMP_ARCH_NOT_SUPPORTED;
+    return ERROR_NUMAP_ARCH_NOT_SUPPORTED;
   }
 
   curr_err = pfm_initialize();
@@ -255,129 +274,100 @@ int numap_init(void) {
   return 0;
 }
 
-int numap_bdw_init_measure(struct numap_bdw_measure *measure) {
+int numap_counting_init_measure(struct numap_counting_measure *measure) {
 
   measure->nb_nodes = nb_numa_nodes;
   measure->started = 0;
   return 0;
 }
 
-int numap_bdw_start(struct numap_bdw_measure *measure) {
-  int node;
+int __numap_counting_start(struct numap_counting_measure *measure, struct perf_event_attr *pe_attr_read, struct perf_event_attr *pe_attr_write) {
 
-  // Check everything is ok
+  /**
+   * Check everything is ok
+   */
   if (measure->started != 0) {
-    return ERROR_NUMEMP_ALREADY_STARTED;
+    return ERROR_NUMAP_ALREADY_STARTED;
   } else {
     measure->started++;
   }
 
-  // Bull's Westmere EP
-  unsigned int family = get_family(current_archi->id);
-  unsigned int model = get_model(current_archi->id);
-  if (family == 6 && model == 44) {
-
-    // Manually set 64 bytes cache line reads/writes from memory counting event
-    struct perf_event_attr pe_attr_unc_memory;
-    memset(&pe_attr_unc_memory, 0, sizeof(pe_attr_unc_memory));
-    pe_attr_unc_memory.size = sizeof(pe_attr_unc_memory);
-    pe_attr_unc_memory.type = 6; // /sys/bus/event_source/uncore/type
-    pe_attr_unc_memory.config = 0x072c; // UNC_QMC_NORMAL_READS.ANY
-    pe_attr_unc_memory.disabled = 1;
-    struct perf_event_attr pe_attr_unc_write_memory;
-    memset(&pe_attr_unc_write_memory, 0, sizeof(pe_attr_unc_write_memory));
-    pe_attr_unc_write_memory.size = sizeof(pe_attr_unc_write_memory);
-    pe_attr_unc_write_memory.type = 6; // /sys/bus/event_source/uncore/type
-    pe_attr_unc_write_memory.config = 0x072f; // UNC_QMC_WRITES.FULL.ANY
-    pe_attr_unc_write_memory.disabled = 1;
-
-    // Open the events on each NUMA node with Linux system call
-    for (node = 0; node < nb_numa_nodes; node++) {
-      measure->fd_reads[node] = perf_event_open(&pe_attr_unc_memory, -1, numa_node_to_cpu[node], -1, 0);
-      if (measure->fd_reads[node] == -1) {
-	return ERROR_PERF_EVENT_OPEN;
-      }
-      measure->fd_writes[node] = perf_event_open(&pe_attr_unc_write_memory, -1, numa_node_to_cpu[node], -1, 0);
-      if (measure->fd_writes[node] == -1) {
-	return ERROR_PERF_EVENT_OPEN;
-      }
-    }
-
-    // Starts measure
-    for (node = 0; node < nb_numa_nodes; node++) {
-      ioctl(measure->fd_reads[node], PERF_EVENT_IOC_RESET, 0);
-      ioctl(measure->fd_reads[node], PERF_EVENT_IOC_ENABLE, 0);
-      ioctl(measure->fd_writes[node], PERF_EVENT_IOC_RESET, 0);
-      ioctl(measure->fd_writes[node], PERF_EVENT_IOC_ENABLE, 0);
-    }
-  }
-
-  // Manu's laptop
-  // CARE DOESN'COUNT THE GOOD THING, IT SHOULD BE COUNTED ON ALL THE PROCESSOR
-  // CARE JUST FOR DEMONSTRATION PURPOSE
-  if (family == 6 && model == 42) {
-
-    // Use pfmlib to set offcore request LOAD with response from MEMORY and ANY_SNOOP
-    pfm_perf_encode_arg_t arg_load;
-    struct perf_event_attr arg_load_pe_attr;
-    memset(&arg_load, 0, sizeof(arg_load));
-    memset(&arg_load_pe_attr, 0, sizeof(arg_load_pe_attr));
-    arg_load.size = sizeof(pfm_perf_encode_arg_t);
-    arg_load.attr = &arg_load_pe_attr;
-    char *fstr;
-    arg_load.fstr = &fstr;
-    curr_err = pfm_get_os_event_encoding("OFFCORE_RESPONSE_0:ANY_DATA:LLC_MISS_LOCAL_DRAM:SNP_ANY", PFM_PLM0 | PFM_PLM3, PFM_OS_PERF_EVENT, &arg_load);
-    if (curr_err != PFM_SUCCESS) {
-      return ERROR_PFM;
-    }
-
-    pfm_perf_encode_arg_t arg_store;
-    struct perf_event_attr arg_store_pe_attr;
-    memset(&arg_store, 0, sizeof(arg_store));
-    memset(&arg_store_pe_attr, 0, sizeof(arg_store_pe_attr));
-    arg_store.attr = &arg_store_pe_attr;
-    arg_store.size = sizeof(pfm_perf_encode_arg_t);
-    curr_err = pfm_get_os_event_encoding("OFFCORE_RESPONSE_0:ANY_RFO:LLC_MISS_LOCAL_DRAM:SNP_ANY", PFM_PLM0 | PFM_PLM0, PFM_OS_PERF_EVENT, &arg_store);
-    if (curr_err != PFM_SUCCESS) {
-      return ERROR_PFM;
-    }
-
-    // Open the events on each CPU with Linux system call
-    int node = 0; // single node
-    int pid = -1;
-    int cpu = 0;
-    measure->fd_reads[node] = perf_event_open(arg_load.attr, pid, cpu, -1, 0);
+  // Open the events on each NUMA node with Linux system call
+  for (int node = 0; node < measure->nb_nodes; node++) {
+    measure->fd_reads[node] = perf_event_open(pe_attr_read, -1, numa_node_to_cpu[node], -1, 0);
     if (measure->fd_reads[node] == -1) {
       return ERROR_PERF_EVENT_OPEN;
     }
-    measure->fd_writes[node] = perf_event_open(arg_store.attr, pid, cpu, -1, 0);
+    measure->fd_writes[node] = perf_event_open(pe_attr_write, -1, numa_node_to_cpu[node], -1, 0);
     if (measure->fd_writes[node] == -1) {
       return ERROR_PERF_EVENT_OPEN;
     }
+  }
 
-    // Starts measure
-    for (node = 0; node < nb_numa_nodes; node++) {
-      ioctl(measure->fd_reads[node], PERF_EVENT_IOC_RESET, 0);
-      ioctl(measure->fd_reads[node], PERF_EVENT_IOC_ENABLE, 0);
-      ioctl(measure->fd_writes[node], PERF_EVENT_IOC_RESET, 0);
-      ioctl(measure->fd_writes[node], PERF_EVENT_IOC_ENABLE, 0);
-    }
+  // Starts measure
+  for (int node = 0; node < measure->nb_nodes; node++) {
+    ioctl(measure->fd_reads[node], PERF_EVENT_IOC_RESET, 0);
+    ioctl(measure->fd_reads[node], PERF_EVENT_IOC_ENABLE, 0);
+    ioctl(measure->fd_writes[node], PERF_EVENT_IOC_RESET, 0);
+    ioctl(measure->fd_writes[node], PERF_EVENT_IOC_ENABLE, 0);
   }
 
   return 0;
 }
 
-int numap_bdw_stop(struct numap_bdw_measure *measure) {
-  int node;
+int numap_counting_start(struct numap_counting_measure *measure) {
+
+  // Set attribute parameter for counting reads using pfmlib
+  struct perf_event_attr pe_attr_read;
+  memset(&pe_attr_read, 0, sizeof(pe_attr_read));
+  pe_attr_read.size = sizeof(pe_attr_read);
+  pfm_perf_encode_arg_t arg;
+  memset(&arg, 0, sizeof(arg));
+  arg.size = sizeof(pfm_perf_encode_arg_t);
+  arg.attr = &pe_attr_read;
+  char *fstr;
+  arg.fstr = &fstr;
+  curr_err = pfm_get_os_event_encoding(current_archi->counting_read_event, PFM_PLM0 | PFM_PLM3, PFM_OS_PERF_EVENT, &arg);
+  if (curr_err != PFM_SUCCESS) {
+    return ERROR_PFM;
+  }
+
+  // Set attribute parameter for counting writes using pfmlib
+  struct perf_event_attr pe_attr_write;
+
+  // Other parameters
+  pe_attr_read.disabled = 1;
+  pe_attr_read.exclude_kernel = 1;
+  pe_attr_read.exclude_hv = 1;
+
+  return __numap_counting_start(measure, &pe_attr_read, &pe_attr_write);
+
+  // SAVE FOR BULL'S WORKSTATION
+  // Manually set 64 bytes cache line reads/writes from memory counting event
+  /* struct perf_event_attr pe_attr_unc_memory; */
+  /* memset(&pe_attr_unc_memory, 0, sizeof(pe_attr_unc_memory)); */
+  /* pe_attr_unc_memory.size = sizeof(pe_attr_unc_memory); */
+  /* pe_attr_unc_memory.type = 6; // /sys/bus/event_source/uncore/type */
+  /* pe_attr_unc_memory.config = 0x072c; // UNC_QMC_NORMAL_READS.ANY */
+  /* pe_attr_unc_memory.disabled = 1; */
+  /* struct perf_event_attr pe_attr_unc_write_memory; */
+  /* memset(&pe_attr_unc_write_memory, 0, sizeof(pe_attr_unc_write_memory)); */
+  /* pe_attr_unc_write_memory.size = sizeof(pe_attr_unc_write_memory); */
+  /* pe_attr_unc_write_memory.type = 6; // /sys/bus/event_source/uncore/type */
+  /* pe_attr_unc_write_memory.config = 0x072f; // UNC_QMC_WRITES.FULL.ANY */
+  /* pe_attr_unc_write_memory.disabled = 1; */
+}
+
+int numap_counting_stop(struct numap_counting_measure *measure) {
 
   // Check everything is ok
   if (measure->started == 0) {
-    return ERROR_NUMEMP_STOP_BEFORE_START;
+    return ERROR_NUMAP_STOP_BEFORE_START;
   } else {
     measure->started = 0;
   }
 
-  for (node = 0; node < nb_numa_nodes; node++) {
+  for (int node = 0; node < nb_numa_nodes; node++) {
     ioctl(measure->fd_reads[node], PERF_EVENT_IOC_DISABLE, 0);
     ioctl(measure->fd_writes[node], PERF_EVENT_IOC_DISABLE, 0);
     if(read(measure->fd_reads[node], &measure->reads_count[node],
@@ -404,10 +394,6 @@ int numap_sampling_init_measure(struct numap_sampling_measure *measure, int nb_t
   measure->nb_threads = nb_threads;
   measure->sampling_rate = sampling_rate;
 
-  /* fprintf (stderr, "mmap_len                        = %zu bytes\n", measure->mmap_len); */
-  /* fprintf (stderr, "mmap_len - PAGE_SIZE            = %lu bytes\n", measure->mmap_len - measure->page_size); */
-  /* fprintf (stderr, "perf_event_mlock_kb             = %lu bytes\n", perf_event_mlock_kb * 1024l); */
-
   return 0;
 }
 
@@ -417,7 +403,7 @@ int __numap_sampling_start(struct numap_sampling_measure *measure, struct perf_e
    * Check everything is ok
    */
   if (measure->started != 0) {
-    return ERROR_NUMEMP_ALREADY_STARTED;
+    return ERROR_NUMAP_ALREADY_STARTED;
   } else {
     measure->started++;
   }
@@ -459,7 +445,7 @@ int __numap_sampling_start(struct numap_sampling_measure *measure, struct perf_e
 }
 
 int numap_sampling_read_start(struct numap_sampling_measure *measure) {
-  
+
   // Set attribute parameter for perf_event_open using pfmlib
   struct perf_event_attr pe_attr;
   memset(&pe_attr, 0, sizeof(pe_attr));
@@ -487,8 +473,6 @@ int numap_sampling_read_start(struct numap_sampling_measure *measure) {
   pe_attr.exclude_kernel = 1;
   pe_attr.exclude_hv = 1;
 
-  //printf("PE: config = %" PRIx64 ", config1 = %" PRIx64 ", precise = %d\n", pe_attr.config, pe_attr.config1, pe_attr.precise_ip);
-  
   return __numap_sampling_start(measure, &pe_attr);
 }
 
@@ -496,7 +480,7 @@ int numap_sampling_read_stop(struct numap_sampling_measure *measure) {
 
   // Check everything is ok
   if (measure->started == 0) {
-    return ERROR_NUMEMP_STOP_BEFORE_START;
+    return ERROR_NUMAP_STOP_BEFORE_START;
   } else {
     measure->started = 0;
   }

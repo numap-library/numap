@@ -12,8 +12,8 @@ int main() {
   }
 
   // Init measure
-  struct numap_bdw_measure m;
-  res = numap_bdw_init_measure(&m);
+  struct numap_counting_measure m;
+  res = numap_counting_init_measure(&m);
   if(res < 0) {
     fprintf(stderr, "numap_init_measure error : %s\n", numap_error_message(res));
     return -1;
@@ -25,7 +25,7 @@ int main() {
   while (1) {
 
     // Start memory controler read and writes counting
-    res = numap_bdw_start(&m);
+    res = numap_counting_start(&m);
     if(res < 0) {
       fprintf(stderr, "numap_start error : %s\n", numap_error_message(res));
       return -1;
@@ -34,7 +34,7 @@ int main() {
     sleep(1);
 
     // Stop memory controler read and writes counting
-    res = numap_bdw_stop(&m);
+    res = numap_counting_stop(&m);
     if(res < 0) {
       printf("numap_stop error : %s\n", numap_error_message(res));
       return -1;

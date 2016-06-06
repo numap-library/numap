@@ -1,29 +1,25 @@
 #include <inttypes.h>
 #include <sys/types.h>
 #include <perfmon/pfmlib_perf_event.h>
-//#include <linux/perf_event.h>
-
-#define KiB 1024
-#define MiB 1024 * KiB
 
 #define MAX_NB_NUMA_NODES     16
 #define MAX_NB_THREADS        24
 #define MAX_NB_CPUS           32
 
 #define ERROR_PERF_EVENT_OPEN  			-3
-#define ERROR_NUMEMP_NOT_NUMA  			-4
-#define ERROR_NUMEMP_ALREADY_STARTED	        -5
-#define ERROR_NUMEMP_STOP_BEFORE_START          -6
-#define ERROR_NUMEMP_ARCH_NOT_SUPPORTED         -7
+#define ERROR_NUMAP_NOT_NUMA  			-4
+#define ERROR_NUMAP_ALREADY_STARTED	        -5
+#define ERROR_NUMAP_STOP_BEFORE_START           -6
+#define ERROR_NUMAP_ARCH_NOT_SUPPORTED          -7
 #define ERROR_PFM                               -8
 #define ERROR_READ                              -9
 
 #define rmb()		asm volatile("lfence" ::: "memory")
 
 /**
- * Structure representing a measurement of the bdw memory controlers load.
+ * Structure representing a measurement of counting the load of controlers.
  */
-struct numap_bdw_measure {
+struct numap_counting_measure {
   char started;
   int nb_nodes;
   long fd_reads[MAX_NB_NUMA_NODES];
@@ -97,11 +93,11 @@ char* concat(const char *s1, const char *s2);
 int numap_init(void);
 
 /**
- * Memory bandwidth profiling.
+ * Memory counting.
  */
-int numap_bdw_init_measure(struct numap_bdw_measure *measure);
-int numap_bdw_start(struct numap_bdw_measure *measure);
-int numap_bdw_stop(struct numap_bdw_measure *measure);
+int numap_counting_init_measure(struct numap_counting_measure *measure);
+int numap_counting_start(struct numap_counting_measure *measure);
+int numap_counting_stop(struct numap_counting_measure *measure);
 
 /**
  * Memory read and write sampling.
