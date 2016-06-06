@@ -38,11 +38,11 @@ The memory bandwidth abstraction is based on hardware counters at
 - *examples*: contains some examples showing how to use numap. One of
   these examples is a memory bandwidth reporting live tool.
 
-- *include*: contains the numap headers
+- *include*: contains numap headers
 
 - *src*: contains numap implementation files
 
-- *Makefile*: is a simple Makefile building both the library and the examples
+- *Makefile*: is a Makefile building both the library and the examples
 
 ## Dependencies
 
