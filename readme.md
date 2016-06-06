@@ -12,7 +12,9 @@ The memory bandwidth abstraction is based on hardware counters at
   memory controller levels whereas load and store sampling are based
   on modern hardware profiling mechanisms.
 
-## Supported processors with family_model information
+## Supported processors 
+
+### Intel processors with family_model information
 
 - Intel Xeon_E_7450 (06_29)
 - Intel I7_870 (06_30)
@@ -23,8 +25,13 @@ The memory bandwidth abstraction is based on hardware counters at
 - Intel I7_5960X (06_63)
 - Intel I5-4670 (06_60)
 
-## Processors whose integration is ongoing
+### Intel processors whose integration is ongoing
+
 - Intel Xeon X5570 (06_26)
+
+### AMD processors
+
+ - Not yet supported
 
 ## Folders Organization
 
