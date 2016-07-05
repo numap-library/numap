@@ -183,7 +183,7 @@ __attribute__((constructor)) void init(void) {
       strtok(arg, ":");
       char * model_name_strtok = strtok(NULL, "\n");
       int len = strlen(model_name_strtok);
-      model_name = malloc(len);
+      model_name = malloc((len + 1) * sizeof(char));
       strcpy(model_name, model_name_strtok);
     }
   }
