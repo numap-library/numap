@@ -3,6 +3,43 @@
 
 #include "numap.h"
 
+int is_served_by_local_cache1(union perf_mem_data_src data_src) {
+  if (data_src.mem_lvl & PERF_MEM_LVL_HIT) {
+    if (data_src.mem_lvl & PERF_MEM_LVL_L1) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
+int is_served_by_local_cache2(union perf_mem_data_src data_src) {
+  if (data_src.mem_lvl & PERF_MEM_LVL_HIT) {
+    if (data_src.mem_lvl & PERF_MEM_LVL_L2) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
+int is_served_by_local_cache3(union perf_mem_data_src data_src) {
+  if (data_src.mem_lvl & PERF_MEM_LVL_HIT) {
+    if (data_src.mem_lvl & PERF_MEM_LVL_L3) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
+int is_served_by_local_lfb(union perf_mem_data_src data_src) {
+  if (data_src.mem_lvl & PERF_MEM_LVL_HIT) {
+    if (data_src.mem_lvl & PERF_MEM_LVL_LFB) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
+
 int is_served_by_local_cache(union perf_mem_data_src data_src) {
   if (data_src.mem_lvl & PERF_MEM_LVL_HIT) {
     if (data_src.mem_lvl & PERF_MEM_LVL_L1) {
@@ -176,7 +213,10 @@ int numap_sampling_read_print(struct numap_sampling_measure *measure, char print
     struct perf_event_header *header = (struct perf_event_header *)((char *)metadata_page + measure->page_size);
     uint64_t consumed = 0;
     int na_miss_count = 0;
-    int cache_count = 0;
+    int cache1_count = 0;
+    int cache2_count = 0;
+    int cache3_count = 0;
+    int lfb_count = 0;
     int memory_count = 0;
     int remote_memory_count = 0;
     int remote_cache_count = 0;
@@ -191,8 +231,17 @@ int numap_sampling_read_print(struct numap_sampling_measure *measure, char print
 	if (is_served_by_local_NA_miss(sample->data_src)) {
   	  na_miss_count++;
   	}
-	if (is_served_by_local_cache(sample->data_src)) {
-  	  cache_count++;
+	if (is_served_by_local_cache1(sample->data_src)) {
+  	  cache1_count++;
+	}
+	if (is_served_by_local_cache2(sample->data_src)) {
+  	  cache2_count++;
+	}
+	if (is_served_by_local_cache3(sample->data_src)) {
+  	  cache3_count++;
+	}
+	if (is_served_by_local_lfb(sample->data_src)) {
+  	  lfb_count++;
 	}
   	if (is_served_by_local_memory(sample->data_src)) {
   	  memory_count++;
@@ -205,7 +254,7 @@ int numap_sampling_read_print(struct numap_sampling_measure *measure, char print
   	}
   	total_count++;
 	if (print_samples) {
-	  printf("pc = %" PRIx64 ", @ = %" PRIx64 ", src level = %s\n", sample->ip, sample->addr, get_data_src_level(sample->data_src));
+	  printf("pc=%" PRIx64 ", @=%" PRIx64 ", src level=%s, latency=%" PRIu64 "\n", sample->ip, sample->addr, get_data_src_level(sample->data_src), sample->weight);
 	}
       }
       consumed += header->size;
@@ -214,7 +263,10 @@ int numap_sampling_read_print(struct numap_sampling_measure *measure, char print
     printf("\n");
     printf("head = %" PRIu64 " compared to max = %zu\n", head, measure->mmap_len);
     printf("Thread %d: %-8d samples\n", thread, total_count);
-    printf("Thread %d: %-8d %-30s %0.3f%%\n", thread, cache_count, "local cache", (100.0 * cache_count / total_count));
+    printf("Thread %d: %-8d %-30s %0.3f%%\n", thread, cache1_count, "local cache 1", (100.0 * cache1_count / total_count));
+    printf("Thread %d: %-8d %-30s %0.3f%%\n", thread, cache2_count, "local cache 2", (100.0 * cache2_count / total_count));
+    printf("Thread %d: %-8d %-30s %0.3f%%\n", thread, cache3_count, "local cache 3", (100.0 * cache3_count / total_count));
+    printf("Thread %d: %-8d %-30s %0.3f%%\n", thread, lfb_count, "local cache LFB", (100.0 * lfb_count / total_count));
     printf("Thread %d: %-8d %-30s %0.3f%%\n", thread, memory_count, "local memory", (100.0 * memory_count / total_count));
     printf("Thread %d: %-8d %-30s %0.3f%%\n", thread, remote_cache_count, "remote cache or local memory", (100.0 * remote_cache_count / total_count));
     printf("Thread %d: %-8d %-30s %0.3f%%\n", thread, remote_memory_count, "remote memory", (100.0 * remote_memory_count / total_count));
@@ -234,7 +286,10 @@ int numap_sampling_write_print(struct numap_sampling_measure *measure, char prin
     struct perf_event_header *header = (struct perf_event_header *)((char *)metadata_page + measure->page_size);
     uint64_t consumed = 0;
     int na_miss_count = 0;
-    int cache_count = 0;
+    int cache1_count = 0;
+    int cache2_count = 0;
+    int cache3_count = 0;
+    int lfb_count = 0;
     int memory_count = 0;
     int remote_memory_count = 0;
     int remote_cache_count = 0;
@@ -249,8 +304,17 @@ int numap_sampling_write_print(struct numap_sampling_measure *measure, char prin
 	if (is_served_by_local_NA_miss(sample->data_src)) {
   	  na_miss_count++;
   	}
-	if (is_served_by_local_cache(sample->data_src)) {
-  	  cache_count++;
+	if (is_served_by_local_cache1(sample->data_src)) {
+  	  cache1_count++;
+	}
+	if (is_served_by_local_cache2(sample->data_src)) {
+  	  cache2_count++;
+	}
+	if (is_served_by_local_cache3(sample->data_src)) {
+  	  cache3_count++;
+	}
+	if (is_served_by_local_lfb(sample->data_src)) {
+  	  lfb_count++;
 	}
   	if (is_served_by_local_memory(sample->data_src)) {
   	  memory_count++;
@@ -272,7 +336,10 @@ int numap_sampling_write_print(struct numap_sampling_measure *measure, char prin
     printf("\n");
     printf("head = %" PRIu64 " compared to max = %zu\n", head, measure->mmap_len);
     printf("Thread %d: %-8d samples\n", thread, total_count);
-    printf("Thread %d: %-8d %-30s %0.3f%%\n", thread, cache_count, "local cache", (100.0 * cache_count / total_count));
+    printf("Thread %d: %-8d %-30s %0.3f%%\n", thread, cache1_count, "local cache 1", (100.0 * cache1_count / total_count));
+    printf("Thread %d: %-8d %-30s %0.3f%%\n", thread, cache2_count, "local cache 2", (100.0 * cache2_count / total_count));
+    printf("Thread %d: %-8d %-30s %0.3f%%\n", thread, cache3_count, "local cache 3", (100.0 * cache3_count / total_count));
+    printf("Thread %d: %-8d %-30s %0.3f%%\n", thread, lfb_count, "local cache LFB", (100.0 * lfb_count / total_count));
     printf("Thread %d: %-8d %-30s %0.3f%%\n", thread, memory_count, "local memory", (100.0 * memory_count / total_count));
     printf("Thread %d: %-8d %-30s %0.3f%%\n", thread, remote_cache_count, "remote cache or local memory", (100.0 * remote_cache_count / total_count));
     printf("Thread %d: %-8d %-30s %0.3f%%\n", thread, remote_memory_count, "remote memory", (100.0 * remote_memory_count / total_count));
