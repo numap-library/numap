@@ -4,9 +4,9 @@ numap is a Linux library dedicated to memory profiling based on
 hardware performance monitoring unit (PMU). The main objective for the
 library is to provide high level abstraction for:
 
-- Memory bandwidth profiling
 - Cores load requests sampling
 - Cores store requests sampling
+(- Memory bandwidth profiling)
 
 The memory bandwidth abstraction is based on hardware counters at
   memory controller levels whereas load and store sampling are based
