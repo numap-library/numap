@@ -16,18 +16,16 @@ The memory bandwidth abstraction is based on hardware counters at
 
 ### Intel processors with family_model information
 
-- Intel Xeon_E_7450 (06_29)
-- Intel I7_870 (06_30)
-- Intel WESTMERE_EP (06_44)
-- Intel Xeon_E5_2670 (06_45)
-- Intel I5_2520 (06_42)
-- Intel I7_3770 (06_58)
-- Intel I7_5960X (06_63)
-- Intel I5-4670 (06_60)
-
-### Intel processors whose integration is ongoing
-
-- Intel Xeon X5570 (06_26)
+- Xeon_X_5570 (06_26)
+- Xeon_E_7450 (06_29)
+- I7_870 (06_30)
+- WESTMERE_EP (06_44)
+- Xeon_E5_2670 (06_45)
+- I5_2520 (06_42)
+- I7_3770 (06_58)
+- I5_4670 (06_60)
+- I7_5960X (06_63)
+- I7_46OOU (06_69)
 
 ### AMD processors
 
