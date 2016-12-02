@@ -6,11 +6,6 @@ library is to provide high level abstraction for:
 
 - Cores load requests sampling
 - Cores store requests sampling
-- (Memory bandwidth profiling)
-
-The memory bandwidth abstraction is based on hardware counters at
-  memory controller levels whereas load and store sampling are based
-  on modern hardware profiling mechanisms.
 
 ## Supported processors 
 
