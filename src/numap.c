@@ -439,6 +439,9 @@ int __numap_sampling_start(struct numap_sampling_measure *measure, struct perf_e
     if (measure->fd_per_tid[thread] == -1) {
       return ERROR_PERF_EVENT_OPEN;
     }
+    if(measure->metadata_pages_per_tid[thread]) {
+      munmap(measure->metadata_pages_per_tid[thread], measure->mmap_len);
+    }
     measure->metadata_pages_per_tid[thread] = mmap(NULL, measure->mmap_len, PROT_WRITE, MAP_SHARED, measure->fd_per_tid[thread], 0);
     if (measure->metadata_pages_per_tid[thread] == MAP_FAILED) {
       if (errno == EPERM) {
