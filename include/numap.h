@@ -119,6 +119,10 @@ const char *numap_error_message(int error);
 /**
  * Functions to analyse results
  */
+int is_served_by_local_cache1(union perf_mem_data_src data_src);
+int is_served_by_local_cache2(union perf_mem_data_src data_src);
+int is_served_by_local_cache3(union perf_mem_data_src data_src);
+int is_served_by_local_lfb(union perf_mem_data_src data_src);
 int is_served_by_local_cache(union perf_mem_data_src data_src);
 int is_served_by_local_memory(union perf_mem_data_src data_src);
 int is_served_by_remote_cache_or_local_memory(union perf_mem_data_src data_src);
