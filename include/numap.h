@@ -55,20 +55,10 @@ struct numap_sampling_measure {
  * Structure representing a read sample gathered with the library in
  * sampling mode.
  */
-struct __attribute__ ((__packed__)) read_sample {
+struct __attribute__ ((__packed__)) sample {
   uint64_t ip;
   uint64_t addr;
   uint64_t weight;
-  union perf_mem_data_src data_src;
-};
-
-/**
- * Structure representing a write sample gathered with the library in
- * sampling mode.
- */
-struct __attribute__ ((__packed__)) write_sample {
-  uint64_t ip;
-  uint64_t addr;
   union perf_mem_data_src data_src;
 };
 
@@ -109,6 +99,7 @@ int numap_sampling_read_print(struct numap_sampling_measure *measure, char print
 int numap_sampling_write_start(struct numap_sampling_measure *measure);
 int numap_sampling_write_stop(struct numap_sampling_measure *measure);
 int numap_sampling_write_print(struct numap_sampling_measure *measure, char print_samples);
+int numap_sampling_print(struct numap_sampling_measure *measure, char print_samples);
 int numap_sampling_end(struct numap_sampling_measure *measure);
 
 /**

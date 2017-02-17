@@ -533,7 +533,7 @@ int numap_sampling_write_start(struct numap_sampling_measure *measure) {
 
   // Sampling parameters
   pe_attr.sample_period = measure->sampling_rate;
-  pe_attr.sample_type = PERF_SAMPLE_IP | PERF_SAMPLE_ADDR | PERF_SAMPLE_DATA_SRC;
+  pe_attr.sample_type = PERF_SAMPLE_IP | PERF_SAMPLE_ADDR | PERF_SAMPLE_WEIGHT | PERF_SAMPLE_DATA_SRC;
   pe_attr.mmap = 1;
   pe_attr.task = 1;
   pe_attr.precise_ip = 2;
