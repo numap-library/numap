@@ -40,6 +40,7 @@ include_directories("${PROJECT_BINARY_DIR}/include")
 # add the sub directories
 include_directories("${PROJECT_SOURCE_DIR}/include")
 add_subdirectory ("src")
+add_subdirectory ("examples")
 
 # use, i.e. don't skip the full RPATH for the build tree
 SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
