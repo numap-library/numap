@@ -435,13 +435,15 @@ int __numap_sampling_start(struct numap_sampling_measure *measure, struct perf_e
   int thread;
   for (thread = 0; thread < measure->nb_threads; thread++) {
 
+    if(measure->metadata_pages_per_tid[thread]) {
+      munmap(measure->metadata_pages_per_tid[thread], measure->mmap_len);
+      close(measure->fd_per_tid[thread]);
+    }
+
     measure->fd_per_tid[thread] = perf_event_open(pe_attr, measure->tids[thread], cpu,
 						  -1, 0);
     if (measure->fd_per_tid[thread] == -1) {
       return ERROR_PERF_EVENT_OPEN;
-    }
-    if(measure->metadata_pages_per_tid[thread]) {
-      munmap(measure->metadata_pages_per_tid[thread], measure->mmap_len);
     }
     measure->metadata_pages_per_tid[thread] = mmap(NULL, measure->mmap_len, PROT_WRITE, MAP_SHARED, measure->fd_per_tid[thread], 0);
     if (measure->metadata_pages_per_tid[thread] == MAP_FAILED) {
