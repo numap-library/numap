@@ -175,9 +175,10 @@ __attribute__((constructor)) void init(void) {
 
   // Check architecture
   FILE *cpuinfo = fopen("/proc/cpuinfo", "rb");
-  char *arg;
+  char *arg = NULL;
   size_t size = 0;
-  unsigned char family, model;
+  unsigned char family = 0;
+  unsigned char model = 0;
   const char *family_string = "cpu family\t";
   const char *model_string = "model\t";
   const char *model_name_string = "model name\t";
