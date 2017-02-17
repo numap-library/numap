@@ -1,0 +1,5 @@
+#ifndef NUMAP_CONFIG_H
+#define NUMAP_CONFIG_H
+
+#define INSTALL_PREFIX @CMAKE_INSTALL_PREFIX@
+#endif
