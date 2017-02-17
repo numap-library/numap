@@ -277,9 +277,9 @@ int numap_sampling_print(struct numap_sampling_measure *measure, char print_samp
 }
 
 int numap_sampling_read_print(struct numap_sampling_measure *measure, char print_samples) {
-  return numap_sampling_read_print(measure, print_samples);
+  return numap_sampling_print(measure, print_samples);
 }
 
 int numap_sampling_write_print(struct numap_sampling_measure *measure, char print_samples) {
-  return numap_sampling_read_print(measure, print_samples);
+  return numap_sampling_print(measure, print_samples);
 }
