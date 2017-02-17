@@ -12,10 +12,14 @@
 # compilation or because you installed it in an "unusual" directory).
 # Just set NUMACTL_DIR it to your specific installation directory
 #
-FIND_PATH( NUMACTL_INCLUDE_DIR numa.h )
+FIND_PATH( NUMACTL_INCLUDE_DIR numa.h
+  HINTS ${NUMACTL_DIR}/include
+  )
 
 find_library(NUMACTL_LIBRARY
-  NAMES numa)
+  NAMES numa
+  HINTS ${NUMACTL_DIR}/lib
+  )
 
 include(FindPackageHandleStandardArgs)
 # handle the QUIETLY and REQUIRED arguments and set LIBXML2_FOUND to TRUE

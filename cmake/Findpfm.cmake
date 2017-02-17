@@ -12,9 +12,13 @@
 # compilation or because you installed it in an "unusual" directory).
 # Just set PFM_DIR it to your specific installation directory
 #
-FIND_PATH( PFM_INCLUDE_DIR perfmon/pfmlib_perf_event.h )
+FIND_PATH( PFM_INCLUDE_DIR perfmon/pfmlib_perf_event.h
+  HINTS ${PFM_DIR}/include
+  )
 
-find_library(PFM_LIBRARY NAMES pfm)
+find_library(PFM_LIBRARY NAMES pfm
+  HINTS ${PFM_DIR}/lib
+  )
 
 include(FindPackageHandleStandardArgs)
 # handle the QUIETLY and REQUIRED arguments and set LIBXML2_FOUND to TRUE
