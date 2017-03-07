@@ -62,4 +62,24 @@ IF("${isSystemDir}" STREQUAL "-1")
    SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 ENDIF("${isSystemDir}" STREQUAL "-1")
 
+
+SET(PKG_CONFIG_LIBDIR
+  "\${prefix}/lib"
+  )
+SET(PKG_CONFIG_INCLUDEDIR
+  "\${prefix}/include"
+  )
+SET(PKG_CONFIG_LIBS
+  "-L\${libdir} -lnumap"
+  )
+SET(PKG_CONFIG_CFLAGS
+  "-I\${includedir}"
+  )
+CONFIGURE_FILE(
+  "${CMAKE_CURRENT_SOURCE_DIR}/pkg-config.pc.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc"
+  )
+
 install(TARGETS DESTINATION bin)
+install(FILES "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.pc"
+          DESTINATION lib/pkgconfig)
