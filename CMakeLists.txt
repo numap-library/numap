@@ -9,10 +9,17 @@ set (NUMAP_VERSION_MINOR 1)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
+SET(PKG_CONFIG_LIBDIR  "\${prefix}/lib"  )
+SET(PKG_CONFIG_INCLUDEDIR  "\${prefix}/include"  )
+SET(PKG_CONFIG_LIBS  "-L\${libdir} -lnumap"  )
+SET(PKG_CONFIG_CFLAGS  "-I\${includedir}"  )
+
 find_package (pfm)
 if (PFM_FOUND)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -I${PFM_INCLUDE_DIR}")
   set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}  ${PFM_LIBRARIES}")
+  set(PKG_CONFIG_CFLAGS "${PKG_CONFIG_CFLAGS} -I${PFM_INCLUDE_DIR}")
+  set(PKG_CONFIG_LIBS "${PKG_CONFIG_LIBS} ${PFM_LIBRARIES}")
 else (PFM_FOUND)
   message(FATAL_ERROR "libpfm not found")
 endif (PFM_FOUND)
@@ -21,6 +28,8 @@ find_package (numactl)
 if (NUMACTL_FOUND)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -I${NUMACTL_INCLUDE_DIRS}")
   set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}  ${NUMACTL_LIBRARIES}")
+  set(PKG_CONFIG_CFLAGS "${PKG_CONFIG_CFLAGS} -I${NUMACTL_INCLUDE_DIRS}")
+  set(PKG_CONFIG_LIBS "${PKG_CONFIG_LIBS} ${NUMACTL_LIBRARIES}")
 else (NUMACTL_FOUND)
   message(FATAL_ERROR "numactl not found")
 endif (NUMACTL_FOUND)
@@ -63,18 +72,6 @@ IF("${isSystemDir}" STREQUAL "-1")
 ENDIF("${isSystemDir}" STREQUAL "-1")
 
 
-SET(PKG_CONFIG_LIBDIR
-  "\${prefix}/lib"
-  )
-SET(PKG_CONFIG_INCLUDEDIR
-  "\${prefix}/include"
-  )
-SET(PKG_CONFIG_LIBS
-  "-L\${libdir} -lnumap"
-  )
-SET(PKG_CONFIG_CFLAGS
-  "-I\${includedir}"
-  )
 CONFIGURE_FILE(
   "${CMAKE_CURRENT_SOURCE_DIR}/pkg-config.pc.cmake"
   "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc"
