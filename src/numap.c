@@ -434,10 +434,9 @@ int __numap_sampling_start(struct numap_sampling_measure *measure, struct perf_e
   int cpu = -1;
   int thread;
   for (thread = 0; thread < measure->nb_threads; thread++) {
-
     if(measure->metadata_pages_per_tid[thread]) {
-      munmap(measure->metadata_pages_per_tid[thread], measure->mmap_len);
-      close(measure->fd_per_tid[thread]);
+      /* Already open, we can skip this one */
+      continue;
     }
 
     measure->fd_per_tid[thread] = perf_event_open(pe_attr, measure->tids[thread], cpu,
@@ -478,6 +477,7 @@ int numap_sampling_read_start(struct numap_sampling_measure *measure) {
   arg.attr = &pe_attr;
   char *fstr;
   arg.fstr = &fstr;
+
   curr_err = pfm_get_os_event_encoding(current_archi->sampling_read_event, PFM_PLM0 | PFM_PLM3, PFM_OS_PERF_EVENT, &arg);
   if (curr_err != PFM_SUCCESS) {
     return ERROR_PFM;
