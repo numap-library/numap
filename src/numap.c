@@ -414,6 +414,29 @@ int numap_sampling_init_measure(struct numap_sampling_measure *measure, int nb_t
   return 0;
 }
 
+
+static int __numap_sampling_resume(struct numap_sampling_measure *measure) {
+  int thread;
+  for (thread = 0; thread < measure->nb_threads; thread++) {
+    ioctl(measure->fd_per_tid[thread], PERF_EVENT_IOC_RESET, 0);
+    ioctl(measure->fd_per_tid[thread], PERF_EVENT_IOC_ENABLE, 0);
+  }
+ return 0;
+}
+
+int numap_sampling_resume(struct numap_sampling_measure *measure) {
+  /**
+   * Check everything is ok
+   */
+  if (measure->started != 0) {
+    return ERROR_NUMAP_ALREADY_STARTED;
+  } else {
+    measure->started++;
+  }
+
+  return __numap_sampling_resume(measure);
+}
+
 int __numap_sampling_start(struct numap_sampling_measure *measure, struct perf_event_attr *pe_attr) {
 
   /**
@@ -457,11 +480,8 @@ int __numap_sampling_start(struct numap_sampling_measure *measure, struct perf_e
       exit (EXIT_FAILURE);
     }
   }
-  for (thread = 0; thread < measure->nb_threads; thread++) {
-    ioctl(measure->fd_per_tid[thread], PERF_EVENT_IOC_RESET, 0);
-    ioctl(measure->fd_per_tid[thread], PERF_EVENT_IOC_ENABLE, 0);
-  }
-
+  __numap_sampling_resume(measure);
+  
   return 0;
 }
 

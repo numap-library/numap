@@ -101,6 +101,7 @@ int numap_sampling_write_stop(struct numap_sampling_measure *measure);
 int numap_sampling_write_print(struct numap_sampling_measure *measure, char print_samples);
 int numap_sampling_print(struct numap_sampling_measure *measure, char print_samples);
 int numap_sampling_end(struct numap_sampling_measure *measure);
+int numap_sampling_resume(struct numap_sampling_measure *measure);
 
 /**
  * Error handling.
