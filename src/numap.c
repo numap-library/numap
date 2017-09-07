@@ -354,21 +354,6 @@ int numap_counting_start(struct numap_counting_measure *measure) {
   pe_attr_read.exclude_hv = 1;
 
   return __numap_counting_start(measure, &pe_attr_read, &pe_attr_write);
-
-  // SAVE FOR BULL'S WORKSTATION
-  // Manually set 64 bytes cache line reads/writes from memory counting event
-  /* struct perf_event_attr pe_attr_unc_memory; */
-  /* memset(&pe_attr_unc_memory, 0, sizeof(pe_attr_unc_memory)); */
-  /* pe_attr_unc_memory.size = sizeof(pe_attr_unc_memory); */
-  /* pe_attr_unc_memory.type = 6; // /sys/bus/event_source/uncore/type */
-  /* pe_attr_unc_memory.config = 0x072c; // UNC_QMC_NORMAL_READS.ANY */
-  /* pe_attr_unc_memory.disabled = 1; */
-  /* struct perf_event_attr pe_attr_unc_write_memory; */
-  /* memset(&pe_attr_unc_write_memory, 0, sizeof(pe_attr_unc_write_memory)); */
-  /* pe_attr_unc_write_memory.size = sizeof(pe_attr_unc_write_memory); */
-  /* pe_attr_unc_write_memory.type = 6; // /sys/bus/event_source/uncore/type */
-  /* pe_attr_unc_write_memory.config = 0x072f; // UNC_QMC_WRITES.FULL.ANY */
-  /* pe_attr_unc_write_memory.disabled = 1; */
 }
 
 int numap_counting_stop(struct numap_counting_measure *measure) {
