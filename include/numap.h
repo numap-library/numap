@@ -6,13 +6,14 @@
 #define MAX_NB_THREADS        24
 #define MAX_NB_CPUS           32
 
-#define ERROR_PERF_EVENT_OPEN  			-3
-#define ERROR_NUMAP_NOT_NUMA  			-4
-#define ERROR_NUMAP_ALREADY_STARTED	        -5
-#define ERROR_NUMAP_STOP_BEFORE_START           -6
-#define ERROR_NUMAP_ARCH_NOT_SUPPORTED          -7
-#define ERROR_PFM                               -8
-#define ERROR_READ                              -9
+#define ERROR_PERF_EVENT_OPEN  		              -3
+#define ERROR_NUMAP_NOT_NUMA  			      -4
+#define ERROR_NUMAP_ALREADY_STARTED	              -5
+#define ERROR_NUMAP_STOP_BEFORE_START                 -6
+#define ERROR_NUMAP_ARCH_NOT_SUPPORTED                -7
+#define ERROR_NUMAP_WRITE_SAMPLING_ARCH_NOT_SUPPORTED -8
+#define ERROR_PFM                                     -9
+#define ERROR_READ                                    -10
 
 #define rmb()		asm volatile("lfence" ::: "memory")
 

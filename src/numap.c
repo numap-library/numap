@@ -17,6 +17,8 @@
 
 #define PERF_EVENT_MLOCK_KB_FILE "/proc/sys/kernel/perf_event_mlock_kb"
 
+#define NOT_SUPPORTED "NOT_SUPPORTED"
+
 struct archi {
   unsigned int id;
   const char *name;
@@ -26,103 +28,95 @@ struct archi {
   const char *counting_write_event;
 };
 
-#define NB_SUPPORTED_ARCHS 11
+#define NB_SUPPORTED_ARCHS 10
 
 struct archi Xeon_X_5570 = { .id = 0x06 | 0x1A << 8, // 06_26
 			     .name = "Xeon_X_5570 based on Nehalem micro arch - Gainestown decline",
-			     .sampling_read_event= "MEM_INST_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
-			     .sampling_write_event="NOT_SUPPORTED"
-};
-
-
-struct archi Xeon_E_7450 = { .id = 0x06 | 0x1D << 8, // 06_29
-			     .name = "Xeon_E_7450 based on Penryn micro arch - Dunnington decline",
-			     .sampling_read_event= "NOT_SUPPORTED",
-			     .sampling_write_event="NOT_SUPPORTED",
-			     .counting_read_event="NOT_SUPPORTED",
-			     .counting_write_event="NOT_SUPPORTED"
+			     .sampling_read_event = "MEM_INST_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
+			     .sampling_write_event = NOT_SUPPORTED
 };
 
 struct archi I7_870 = { .id = 0x06 | 0x1E << 8, // 06_30
 			.name = "I7_870 based on Nehalem micro arch - Lynfield decline",
-			.sampling_read_event= "MEM_INST_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
-			.sampling_write_event="NOT_SUPPORTED",
-			.counting_read_event="NOT_SUPPORTED",
-			.counting_write_event="NOT_SUPPORTED"
+			.sampling_read_event = "MEM_INST_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
+			.sampling_write_event = NOT_SUPPORTED,
+			.counting_read_event = NOT_SUPPORTED,
+			.counting_write_event = NOT_SUPPORTED
 };
 
 struct archi WESTMERE_EP = { .id = 0x06 | 0x2C << 8, // O6_44
 			     .name = "Westmere-Ep",
 			     .sampling_read_event= "MEM_INST_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
-			     .sampling_write_event="NOT_SUPPORTED",
-			     .counting_read_event="NOT_SUPPORTED",
-			     .counting_write_event="NOT_SUPPORTED"
+			     .sampling_write_event = NOT_SUPPORTED,
+			     .counting_read_event = NOT_SUPPORTED,
+			     .counting_write_event = NOT_SUPPORTED
 };
 
 struct archi Xeon_E5_2670 = { .id = 0x06 | 0x2D << 8, // 06_45
 			      .name = "Xeon E5-2670 based on Sandy Bridge micro arch - Sandy Bridge-EP decline",
-			      .sampling_read_event= "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
-			      .sampling_write_event="MEM_TRANS_RETIRED:PRECISE_STORE",
-			      .counting_read_event="NOT_SUPPORTED",
-			      .counting_write_event="NOT_SUPPORTED"
+			      .sampling_read_event = "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
+			      .sampling_write_event ="MEM_TRANS_RETIRED:PRECISE_STORE",
+			      .counting_read_event = NOT_SUPPORTED,
+			      .counting_write_event = NOT_SUPPORTED
 };
 
 struct archi I5_2520 = { .id = 0x06 | 0x2A << 8, // 06_42
 			 .name = "I5_2520 based on Sandy Bridge micro arch - Sandy Bridge decline - 2nd generation Intel Core",
-			 // NOTE in the Intel SDM it's named MEM_TRANS_RETIRED:LOAD_LATENCY
-			 // but the number correspond with  the one returned pfmlib
-			 .sampling_read_event= "MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
-			 .sampling_write_event="MEM_TRANS_RETIRED:PRECISE_STORE",
-			 .counting_read_event="NOT_SUPPORTED",
-			 .counting_write_event="NOT_SUPPORTED"
+			 // NOTE: in the Intel SDM, read sampling event is MEM_TRANS_RETIRED:LOAD_LATENCY.
+			 // In practice this event does not work. As a consequence we use the event below
+			 // which is the one used by perf mem record and reported by the pfm library
+			 .sampling_read_event = "MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
+			 .sampling_write_event = "MEM_TRANS_RETIRED:PRECISE_STORE",
+			 .counting_read_event = NOT_SUPPORTED,
+			 .counting_write_event = NOT_SUPPORTED
 };
 
 struct archi Xeon_E5_2660 = { .id = 0x06 | 0x3E << 8, // 06_62
 			 .name = "Xeon_E5_2660 based on Ivy Bridge micro arch - Ivy Bridge-E decline - 3rd generation Intel Core",
-			 // NOTE in the Intel SDM it's named MEM_TRANS_RETIRED:LOAD_LATENCY
-			 // but the number correspond with  the one returned pfmlib
-			 .sampling_read_event= "MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
-			 .sampling_write_event="MEM_TRANS_RETIRED:PRECISE_STORE",
-			 .counting_read_event="NOT_SUPPORTED",
-			 .counting_write_event="NOT_SUPPORTED"
+			 // NOTE: in the Intel SDM, read sampling event is MEM_TRANS_RETIRED:LOAD_LATENCY.
+			 // In practice this event does not work. As a consequence we use the event below
+			 // which is the one used by perf mem record and reported by the pfm library
+			 .sampling_read_event = "MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
+			 .sampling_write_event = "MEM_TRANS_RETIRED:PRECISE_STORE",
+			 .counting_read_event = NOT_SUPPORTED,
+			 .counting_write_event = NOT_SUPPORTED
 };
 
 struct archi I7_3770 = { .id = 0x06 | 0x3A << 8, // 06_58
 			 .name = "I7_3770 based on Ivy Bridge micro arch - Ivy Bridge decline - 3rd generation Intel Core",
-			 .sampling_read_event= "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
-			 .sampling_write_event="MEM_TRANS_RETIRED:PRECISE_STORE",
-			 .counting_read_event="NOT_SUPPORTED",
-			 .counting_write_event="NOT_SUPPORTED"
+			 .sampling_read_event = "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
+			 .sampling_write_event = "MEM_TRANS_RETIRED:PRECISE_STORE",
+			 .counting_read_event = NOT_SUPPORTED,
+			 .counting_write_event = NOT_SUPPORTED
 };
 
 struct archi I7_5960X = { .id = 0x06 | 0x3F << 8, // 06_63
 			  .name = "I7_5960X based on Haswell micro arch - Haswell-E decline - 4th generation Intel Core",
-			  .sampling_read_event= "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
-			  .sampling_write_event="MEM_UOPS_RETIRED:ALL_STORES",
-			  .counting_read_event="NOT_SUPPORTED",
-			  .counting_write_event="NOT_SUPPORTED"
+			  .sampling_read_event = "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
+			  .sampling_write_event = "MEM_UOPS_RETIRED:ALL_STORES",
+			  .counting_read_event = NOT_SUPPORTED,
+			  .counting_write_event = NOT_SUPPORTED
 };
 
 struct archi I5_4670 = { .id = 0x06 | 0x3C << 8, // 06_60
 			 .name = "I5-4670 based on Haswell micro arch - Haswell-DT decline - 4th generation Intel Core",
-			 .sampling_read_event= "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
-			 .sampling_write_event="MEM_UOPS_RETIRED:ALL_STORES",
-			 .counting_read_event="NOT_SUPPORTED",
-			 .counting_write_event="NOT_SUPPORTED"
+			 .sampling_read_event = "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
+			 .sampling_write_event = "MEM_UOPS_RETIRED:ALL_STORES",
+			 .counting_read_event = NOT_SUPPORTED,
+			 .counting_write_event = NOT_SUPPORTED
 };
 
 struct archi I7_4600U = { .id = 0x06 | 0x45 << 8, // 06_69
 			 .name = "I7-46OOU based on Haswell micro arch - Haswell-ULT decline - 4th generation Intel Core",
-			 .sampling_read_event= "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
-			 .sampling_write_event="MEM_UOPS_RETIRED:ALL_STORES",
-			 .counting_read_event="NOT_SUPPORTED",
-			 .counting_write_event="NOT_SUPPORTED"
+			 .sampling_read_event = "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
+			 .sampling_write_event = "MEM_UOPS_RETIRED:ALL_STORES",
+			 .counting_read_event = NOT_SUPPORTED,
+			 .counting_write_event = NOT_SUPPORTED
 };
 
 
 static struct archi *supported_archs[NB_SUPPORTED_ARCHS] = {
   &Xeon_X_5570,
-  &Xeon_E_7450,
   &I7_870,
   &WESTMERE_EP,
   &Xeon_E5_2670,
@@ -263,6 +257,8 @@ const char *numap_error_message(int error) {
     return "libnumap: start called again before stop";
   case ERROR_NUMAP_ARCH_NOT_SUPPORTED:
     return concat("libnumap: architecture not supported: ", model_name);
+  case ERROR_NUMAP_WRITE_SAMPLING_ARCH_NOT_SUPPORTED:
+    return concat("libnumap: write sampling not supported on architecture: ", model_name);
   case ERROR_PERF_EVENT_OPEN:
     return concat(pe_error, strerror(errno));
   case ERROR_PFM:
@@ -541,6 +537,11 @@ int numap_sampling_read_stop(struct numap_sampling_measure *measure) {
 
 int numap_sampling_write_start(struct numap_sampling_measure *measure) {
 
+  // Checks that write sampling is supported before calling pfm
+  if (strcmp(current_archi->sampling_write_event, NOT_SUPPORTED) == 0) {
+    return ERROR_NUMAP_WRITE_SAMPLING_ARCH_NOT_SUPPORTED;
+  }
+
   // Set attribute parameter for perf_event_open using pfmlib
   struct perf_event_attr pe_attr;
   memset(&pe_attr, 0, sizeof(pe_attr));
@@ -550,7 +551,7 @@ int numap_sampling_write_start(struct numap_sampling_measure *measure) {
   arg.size = sizeof(pfm_perf_encode_arg_t);
   arg.attr = &pe_attr;
   char *fstr;
-  arg.fstr = &fstr;
+  arg.fstr = &fstr;  
   curr_err = pfm_get_os_event_encoding(current_archi->sampling_write_event, PFM_PLM0 | PFM_PLM3, PFM_OS_PERF_EVENT, &arg);
   if (curr_err != PFM_SUCCESS) {
     return ERROR_PFM;
