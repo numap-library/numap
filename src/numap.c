@@ -404,13 +404,18 @@ int numap_counting_stop(struct numap_counting_measure *measure) {
 
 int numap_sampling_init_measure(struct numap_sampling_measure *measure, int nb_threads, int sampling_rate, int mmap_pages_count) {
 
+  int thread;
   measure->started = 0;
   measure->page_size = (size_t)sysconf(_SC_PAGESIZE);
   measure->mmap_pages_count = mmap_pages_count;
   measure->mmap_len = measure->page_size + measure->page_size * measure->mmap_pages_count;
   measure->nb_threads = nb_threads;
   measure->sampling_rate = sampling_rate;
-
+  for (thread = 0; thread < measure->nb_threads; thread++) {
+    measure->fd_per_tid[thread] = 0;
+    measure->metadata_pages_per_tid[thread] = 0;
+  }
+ 
   return 0;
 }
 
