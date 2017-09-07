@@ -3,7 +3,8 @@
 #
 
 # PFM_INCLUDE_DIR  - Directories to include to use PFM
-# PFM_LIBRARY    - Files to link against to use PFM
+# PFM_LIBRARIES    - Files to link against to use PFM
+# PFM_LIB_DIR      - The directory containing PFM_LIBRARIES
 # PFM_FOUND        - When false, don't try to use PFM
 #
 # PFM_DIR can be used to make it simpler to find the various include
@@ -16,7 +17,8 @@ FIND_PATH( PFM_INCLUDE_DIR perfmon/pfmlib_perf_event.h
   HINTS ${PFM_DIR}/include
   )
 
-find_library(PFM_LIBRARY NAMES pfm
+find_library(PFM_LIBRARY
+  NAMES pfm
   HINTS ${PFM_DIR}/lib
   )
 
@@ -31,11 +33,10 @@ IF( PFM_INCLUDE_DIR )
     SET( PFM_FOUND "YES" )
     MARK_AS_ADVANCED( PFM_DIR PFM_INCLUDE_DIR PFM_LIBRARY )
     set(PFM_LIBRARIES ${PFM_LIBRARY} )
+    get_filename_component(PFM_LIB_DIR ${PFM_LIBRARY} DIRECTORY)
     set(PFM_INCLUDE_DIRS ${PFM_INCLUDE_DIR} )
   ENDIF( PFM_LIBRARY )
 ENDIF( PFM_INCLUDE_DIR )
-
-
 
 IF( NOT PFM_FOUND )
   MESSAGE("PFM installation was not found. Please provide PFM_DIR:")

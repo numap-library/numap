@@ -3,8 +3,9 @@
 #
 
 # NUMACTL_INCLUDE_DIRS  - Directories to include to use NUMACTL
-# NUMACTL_LIBRARIES    - Files to link against to use NUMACTL
-# NUMACTL_FOUND        - When false, don't try to use NUMACTL
+# NUMACTL_LIBRARIES     - Files to link against to use NUMACTL
+# NUMACTL_LIB_DIR       - The directory containing NUMACTL_LIBRARIES
+# NUMACTL_FOUND         - When false, don't try to use NUMACTL
 #
 # NUMACTL_DIR can be used to make it simpler to find the various include
 # directories and compiled libraries when NUMACTL was not installed in the
@@ -32,6 +33,7 @@ IF( NUMACTL_INCLUDE_DIR )
     SET( NUMACTL_FOUND "YES" )
     MARK_AS_ADVANCED( NUMACTL_INCLUDE_DIR NUMACTL_LIBRARY )
     set(NUMACTL_LIBRARIES ${NUMACTL_LIBRARY} )
+    get_filename_component(NUMACTL_LIB_DIR ${NUMACTL_LIBRARY} DIRECTORY)
     set(NUMACTL_INCLUDE_DIRS ${NUMACTL_INCLUDE_DIR} )
   ENDIF( NUMACTL_LIBRARY )
 ENDIF( NUMACTL_INCLUDE_DIR )
