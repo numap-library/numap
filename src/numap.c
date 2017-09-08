@@ -31,87 +31,88 @@ struct archi {
 #define NB_SUPPORTED_ARCHS 10
 
 struct archi Xeon_X_5570 = { .id = 0x06 | 0x1A << 8, // 06_26
-			     .name = "Xeon_X_5570 based on Nehalem micro arch - Gainestown decline",
-			     .sampling_read_event = "MEM_INST_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
-			     .sampling_write_event = NOT_SUPPORTED
+							 .name = "Xeon_X_5570 based on Nehalem micro arch - Gainestown decline",
+							 .sampling_read_event = "MEM_INST_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
+							 .sampling_write_event = NOT_SUPPORTED
 };
 
 struct archi I7_870 = { .id = 0x06 | 0x1E << 8, // 06_30
-			.name = "I7_870 based on Nehalem micro arch - Lynfield decline",
-			.sampling_read_event = "MEM_INST_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
-			.sampling_write_event = NOT_SUPPORTED,
-			.counting_read_event = NOT_SUPPORTED,
-			.counting_write_event = NOT_SUPPORTED
+						.name = "I7_870 based on Nehalem micro arch - Lynfield decline",
+						.sampling_read_event = "MEM_INST_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
+						.sampling_write_event = NOT_SUPPORTED,
+						.counting_read_event = NOT_SUPPORTED,
+						.counting_write_event = NOT_SUPPORTED
 };
 
 struct archi WESTMERE_EP = { .id = 0x06 | 0x2C << 8, // O6_44
-			     .name = "Westmere-Ep",
-			     .sampling_read_event= "MEM_INST_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
-			     .sampling_write_event = NOT_SUPPORTED,
-			     .counting_read_event = NOT_SUPPORTED,
-			     .counting_write_event = NOT_SUPPORTED
+							 .name = "Westmere-Ep",
+							 .sampling_read_event= "MEM_INST_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
+							 .sampling_write_event = NOT_SUPPORTED,
+							 .counting_read_event = NOT_SUPPORTED,
+							 .counting_write_event = NOT_SUPPORTED
 };
 
-struct archi Xeon_E5_2670 = { .id = 0x06 | 0x2D << 8, // 06_45
-			      .name = "Xeon E5-2670 based on Sandy Bridge micro arch - Sandy Bridge-EP decline",
-			      .sampling_read_event = "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
-			      .sampling_write_event ="MEM_TRANS_RETIRED:PRECISE_STORE",
-			      .counting_read_event = NOT_SUPPORTED,
-			      .counting_write_event = NOT_SUPPORTED
+
+struct archi SANDY_BRIDGE_EP = { .id = 0x06 | 0x2D << 8, // 06_45
+			 .name   =    "Sandy   Bridge micro-arch - Romley EP decline",
+			 .sampling_read_event= "MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
+			 .sampling_write_event="MEM_TRANS_RETIRED:PRECISE_STORE",
+			 .counting_read_event= NOT_SUPPORTED
+			 .counting_write_event= NOT_SUPPORTED
 };
 
 struct archi I5_2520 = { .id = 0x06 | 0x2A << 8, // 06_42
-			 .name = "I5_2520 based on Sandy Bridge micro arch - Sandy Bridge decline - 2nd generation Intel Core",
-			 // NOTE: in the Intel SDM, read sampling event is MEM_TRANS_RETIRED:LOAD_LATENCY.
-			 // In practice this event does not work. As a consequence we use the event below
-			 // which is the one used by perf mem record and reported by the pfm library
-			 .sampling_read_event = "MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
-			 .sampling_write_event = "MEM_TRANS_RETIRED:PRECISE_STORE",
-			 .counting_read_event = NOT_SUPPORTED,
-			 .counting_write_event = NOT_SUPPORTED
+						 .name = "I5_2520 based on Sandy Bridge micro arch - Sandy Bridge decline - 2nd generation Intel Core",
+						 // NOTE: in the Intel SDM, read sampling event is MEM_TRANS_RETIRED:LOAD_LATENCY.
+						 // In practice this event does not work. As a consequence we use the event below
+						 // which is the one used by perf mem record and reported by the pfm library
+						 .sampling_read_event = "MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
+						 .sampling_write_event = "MEM_TRANS_RETIRED:PRECISE_STORE",
+						 .counting_read_event = NOT_SUPPORTED,
+						 .counting_write_event = NOT_SUPPORTED
 };
 
 struct archi Xeon_E5_2660 = { .id = 0x06 | 0x3E << 8, // 06_62
-			 .name = "Xeon_E5_2660 based on Ivy Bridge micro arch - Ivy Bridge-E decline - 3rd generation Intel Core",
-			 // NOTE: in the Intel SDM, read sampling event is MEM_TRANS_RETIRED:LOAD_LATENCY.
-			 // In practice this event does not work. As a consequence we use the event below
-			 // which is the one used by perf mem record and reported by the pfm library
-			 .sampling_read_event = "MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
-			 .sampling_write_event = "MEM_TRANS_RETIRED:PRECISE_STORE",
-			 .counting_read_event = NOT_SUPPORTED,
-			 .counting_write_event = NOT_SUPPORTED
+							  .name = "Xeon_E5_2660 based on Ivy Bridge micro arch - Ivy Bridge-E decline - 3rd generation Intel Core",
+							  // NOTE: in the Intel SDM, read sampling event is MEM_TRANS_RETIRED:LOAD_LATENCY.
+							  // In practice this event does not work. As a consequence we use the event below
+							  // which is the one used by perf mem record and reported by the pfm library
+							  .sampling_read_event = "MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
+							  .sampling_write_event = "MEM_TRANS_RETIRED:PRECISE_STORE",
+							  .counting_read_event = NOT_SUPPORTED,
+							  .counting_write_event = NOT_SUPPORTED
 };
 
 struct archi I7_3770 = { .id = 0x06 | 0x3A << 8, // 06_58
-			 .name = "I7_3770 based on Ivy Bridge micro arch - Ivy Bridge decline - 3rd generation Intel Core",
-			 .sampling_read_event = "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
-			 .sampling_write_event = "MEM_TRANS_RETIRED:PRECISE_STORE",
-			 .counting_read_event = NOT_SUPPORTED,
-			 .counting_write_event = NOT_SUPPORTED
+						 .name = "I7_3770 based on Ivy Bridge micro arch - Ivy Bridge decline - 3rd generation Intel Core",
+						 .sampling_read_event = "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
+						 .sampling_write_event = "MEM_TRANS_RETIRED:PRECISE_STORE",
+						 .counting_read_event = NOT_SUPPORTED,
+						 .counting_write_event = NOT_SUPPORTED
 };
 
 struct archi I7_5960X = { .id = 0x06 | 0x3F << 8, // 06_63
-			  .name = "I7_5960X based on Haswell micro arch - Haswell-E decline - 4th generation Intel Core",
-			  .sampling_read_event = "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
-			  .sampling_write_event = "MEM_UOPS_RETIRED:ALL_STORES",
-			  .counting_read_event = NOT_SUPPORTED,
-			  .counting_write_event = NOT_SUPPORTED
+						  .name = "I7_5960X based on Haswell micro arch - Haswell-E decline - 4th generation Intel Core",
+						  .sampling_read_event = "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
+						  .sampling_write_event = "MEM_UOPS_RETIRED:ALL_STORES",
+						  .counting_read_event = NOT_SUPPORTED,
+						  .counting_write_event = NOT_SUPPORTED
 };
 
 struct archi I5_4670 = { .id = 0x06 | 0x3C << 8, // 06_60
-			 .name = "I5-4670 based on Haswell micro arch - Haswell-DT decline - 4th generation Intel Core",
-			 .sampling_read_event = "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
-			 .sampling_write_event = "MEM_UOPS_RETIRED:ALL_STORES",
-			 .counting_read_event = NOT_SUPPORTED,
-			 .counting_write_event = NOT_SUPPORTED
+						 .name = "I5-4670 based on Haswell micro arch - Haswell-DT decline - 4th generation Intel Core",
+						 .sampling_read_event = "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
+						 .sampling_write_event = "MEM_UOPS_RETIRED:ALL_STORES",
+						 .counting_read_event = NOT_SUPPORTED,
+						 .counting_write_event = NOT_SUPPORTED
 };
 
 struct archi I7_4600U = { .id = 0x06 | 0x45 << 8, // 06_69
-			 .name = "I7-46OOU based on Haswell micro arch - Haswell-ULT decline - 4th generation Intel Core",
-			 .sampling_read_event = "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
-			 .sampling_write_event = "MEM_UOPS_RETIRED:ALL_STORES",
-			 .counting_read_event = NOT_SUPPORTED,
-			 .counting_write_event = NOT_SUPPORTED
+						  .name = "I7-46OOU based on Haswell micro arch - Haswell-ULT decline - 4th generation Intel Core",
+						  .sampling_read_event = "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
+						  .sampling_write_event = "MEM_UOPS_RETIRED:ALL_STORES",
+						  .counting_read_event = NOT_SUPPORTED,
+						  .counting_write_event = NOT_SUPPORTED
 };
 
 
@@ -119,7 +120,7 @@ static struct archi *supported_archs[NB_SUPPORTED_ARCHS] = {
   &Xeon_X_5570,
   &I7_870,
   &WESTMERE_EP,
-  &Xeon_E5_2670,
+  &SANDY_BRIDGE_EP
   &I5_2520,
   &Xeon_E5_2660,
   &I7_3770,
