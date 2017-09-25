@@ -33,7 +33,9 @@ struct archi {
 struct archi Xeon_X_5570 = { .id = 0x06 | 0x1A << 8, // 06_26
 							 .name = "Xeon_X_5570 based on Nehalem micro arch - Gainestown decline",
 							 .sampling_read_event = "MEM_INST_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
-							 .sampling_write_event = NOT_SUPPORTED
+			                                 .sampling_write_event = NOT_SUPPORTED,
+			     			         .counting_read_event = NOT_SUPPORTED,
+						         .counting_write_event = NOT_SUPPORTED
 };
 
 struct archi I7_870 = { .id = 0x06 | 0x1E << 8, // 06_30
@@ -57,7 +59,7 @@ struct archi SANDY_BRIDGE_EP = { .id = 0x06 | 0x2D << 8, // 06_45
 			 .name   =    "Sandy   Bridge micro-arch - Romley EP decline",
 			 .sampling_read_event= "MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
 			 .sampling_write_event="MEM_TRANS_RETIRED:PRECISE_STORE",
-			 .counting_read_event= NOT_SUPPORTED
+			 .counting_read_event= NOT_SUPPORTED,
 			 .counting_write_event= NOT_SUPPORTED
 };
 
@@ -120,7 +122,7 @@ static struct archi *supported_archs[NB_SUPPORTED_ARCHS] = {
   &Xeon_X_5570,
   &I7_870,
   &WESTMERE_EP,
-  &SANDY_BRIDGE_EP
+  &SANDY_BRIDGE_EP,
   &I5_2520,
   &Xeon_E5_2660,
   &I7_3770,
