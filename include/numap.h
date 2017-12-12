@@ -97,6 +97,7 @@ int numap_sampling_init_measure(struct numap_sampling_measure *measure, int nb_t
 int numap_sampling_read_start(struct numap_sampling_measure *measure);
 int numap_sampling_read_stop(struct numap_sampling_measure *measure);
 int numap_sampling_read_print(struct numap_sampling_measure *measure, char print_samples);
+int numap_sampling_write_supported();
 int numap_sampling_write_start(struct numap_sampling_measure *measure);
 int numap_sampling_write_stop(struct numap_sampling_measure *measure);
 int numap_sampling_write_print(struct numap_sampling_measure *measure, char print_samples);

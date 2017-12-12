@@ -523,10 +523,18 @@ int numap_sampling_read_stop(struct numap_sampling_measure *measure) {
   return 0;
 }
 
+int numap_sampling_write_supported() {
+
+  if (strcmp(current_archi->sampling_write_event, NOT_SUPPORTED) == 0) {
+    return 0;
+  }
+  return 1;
+}
+
 int numap_sampling_write_start(struct numap_sampling_measure *measure) {
 
   // Checks that write sampling is supported before calling pfm
-  if (strcmp(current_archi->sampling_write_event, NOT_SUPPORTED) == 0) {
+  if (!numap_sampling_write_supported()) {
     return ERROR_NUMAP_WRITE_SAMPLING_ARCH_NOT_SUPPORTED;
   }
 
