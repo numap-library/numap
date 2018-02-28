@@ -474,7 +474,7 @@ int __numap_sampling_start(struct numap_sampling_measure *measure, struct perf_e
   return 0;
 }
 
-int numap_sampling_read_start(struct numap_sampling_measure *measure) {
+int numap_sampling_read_start_generic(struct numap_sampling_measure *measure, uint64_t sample_type) {
 
   // Set attribute parameter for perf_event_open using pfmlib
   struct perf_event_attr pe_attr;
@@ -494,7 +494,7 @@ int numap_sampling_read_start(struct numap_sampling_measure *measure) {
 
   // Sampling parameters
   pe_attr.sample_period = measure->sampling_rate;
-  pe_attr.sample_type = PERF_SAMPLE_IP | PERF_SAMPLE_ADDR | PERF_SAMPLE_WEIGHT | PERF_SAMPLE_DATA_SRC;
+  pe_attr.sample_type = sample_type;
   pe_attr.mmap = 1;
   pe_attr.task = 1;
   pe_attr.precise_ip = 2;
@@ -505,6 +505,11 @@ int numap_sampling_read_start(struct numap_sampling_measure *measure) {
   pe_attr.exclude_hv = 1;
 
   return __numap_sampling_start(measure, &pe_attr);
+
+}
+  
+int numap_sampling_read_start(struct numap_sampling_measure *measure) {
+  return numap_sampling_read_start_generic(measure, PERF_SAMPLE_IP | PERF_SAMPLE_ADDR | PERF_SAMPLE_WEIGHT | PERF_SAMPLE_DATA_SRC);
 }
 
 int numap_sampling_read_stop(struct numap_sampling_measure *measure) {
@@ -531,8 +536,7 @@ int numap_sampling_write_supported() {
   return 1;
 }
 
-int numap_sampling_write_start(struct numap_sampling_measure *measure) {
-
+int numap_sampling_write_start_generic(struct numap_sampling_measure *measure, uint64_t sample_type) {
   // Checks that write sampling is supported before calling pfm
   if (!numap_sampling_write_supported()) {
     return ERROR_NUMAP_WRITE_SAMPLING_ARCH_NOT_SUPPORTED;
@@ -555,7 +559,7 @@ int numap_sampling_write_start(struct numap_sampling_measure *measure) {
 
   // Sampling parameters
   pe_attr.sample_period = measure->sampling_rate;
-  pe_attr.sample_type = PERF_SAMPLE_IP | PERF_SAMPLE_ADDR | PERF_SAMPLE_WEIGHT | PERF_SAMPLE_DATA_SRC;
+  pe_attr.sample_type = sample_type;
   pe_attr.mmap = 1;
   pe_attr.task = 1;
   pe_attr.precise_ip = 2;
@@ -566,6 +570,11 @@ int numap_sampling_write_start(struct numap_sampling_measure *measure) {
   pe_attr.exclude_hv = 1;
 
   return __numap_sampling_start(measure, &pe_attr);
+}
+
+
+int numap_sampling_write_start(struct numap_sampling_measure *measure) {
+  return numap_sampling_write_start_generic(measure, PERF_SAMPLE_IP | PERF_SAMPLE_ADDR | PERF_SAMPLE_WEIGHT | PERF_SAMPLE_DATA_SRC);
 }
 
 int numap_sampling_write_stop(struct numap_sampling_measure *measure) {
