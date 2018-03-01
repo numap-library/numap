@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <sys/syscall.h>
 #include <err.h>
+#include <time.h>
 #include <numa.h>
 
 #include "numap.h"
@@ -498,7 +499,8 @@ int numap_sampling_read_start_generic(struct numap_sampling_measure *measure, ui
   pe_attr.mmap = 1;
   pe_attr.task = 1;
   pe_attr.precise_ip = 2;
-
+  pe_attr.use_clockid=1;
+  pe_attr.clockid = CLOCK_MONOTONIC_RAW;
   // Other parameters
   pe_attr.disabled = 1;
   pe_attr.exclude_kernel = 1;
