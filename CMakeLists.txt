@@ -19,6 +19,7 @@ if (PFM_FOUND)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -I${PFM_INCLUDE_DIR}")
   set(PKG_CONFIG_CFLAGS "${PKG_CONFIG_CFLAGS} -I${PFM_INCLUDE_DIR}")
   set(PKG_CONFIG_LIBS "${PKG_CONFIG_LIBS} ${PFM_LIBRARIES}")
+  link_directories(${PFM_LIB_DIR})
 else (PFM_FOUND)
   message(FATAL_ERROR "libpfm not found")
 endif (PFM_FOUND)
@@ -28,6 +29,7 @@ if (NUMACTL_FOUND)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -I${NUMACTL_INCLUDE_DIRS}")
   set(PKG_CONFIG_CFLAGS "${PKG_CONFIG_CFLAGS} -I${NUMACTL_INCLUDE_DIRS}")
   set(PKG_CONFIG_LIBS "${PKG_CONFIG_LIBS} ${NUMACTL_LIBRARIES}")
+  link_directories(${NUMACTL_LIB_DIR})
 else (NUMACTL_FOUND)
   message(FATAL_ERROR "numactl not found")
 endif (NUMACTL_FOUND)
@@ -38,16 +40,6 @@ configure_file (
   "${PROJECT_SOURCE_DIR}/include/numap_config.h.in"
   "${PROJECT_BINARY_DIR}/include/numap_config.h"
   )
-
-
-# add the binary tree to the search path for include files
-# so that we will find TutorialConfig.h
-include_directories("${PROJECT_BINARY_DIR}/include")
-
-# add the sub directories
-include_directories("${PROJECT_SOURCE_DIR}/include")
-add_subdirectory ("src")
-add_subdirectory ("examples")
 
 # use, i.e. don't skip the full RPATH for the build tree
 SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
@@ -69,6 +61,14 @@ IF("${isSystemDir}" STREQUAL "-1")
    SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 ENDIF("${isSystemDir}" STREQUAL "-1")
 
+# add the binary tree to the search path for include files
+# so that we will find TutorialConfig.h
+include_directories("${PROJECT_BINARY_DIR}/include")
+
+# add the sub directories
+include_directories("${PROJECT_SOURCE_DIR}/include")
+add_subdirectory ("src")
+add_subdirectory ("examples")
 
 CONFIGURE_FILE(
   "${CMAKE_CURRENT_SOURCE_DIR}/pkg-config.pc.cmake"
