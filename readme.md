@@ -21,6 +21,7 @@ library is to provide high level abstraction for:
 - I5_4670 (06_60)
 - I7_5960X (06_63)
 - I7_46OOU (06_69)
+- I7_7820HQ (06_158)
 
 ### AMD processors
 
