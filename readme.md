@@ -15,7 +15,7 @@ library is to provide high level abstraction for:
 - Xeon_E_7450 (06_29)
 - I7_870 (06_30)
 - WESTMERE_EP (06_44)
-- Xeon_E5_2670 (06_45)
+- SANDY_BRIDGE_EP (06_45)
 - I5_2520 (06_42)
 - I7_3770 (06_58)
 - I5_4670 (06_60)
