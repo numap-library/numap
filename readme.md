@@ -9,7 +9,7 @@ library is to provide high level abstraction for:
 
 ## Supported processors 
 
-### Intel processors with family_model information
+### Intel processors with family_model information (decimal noation)
 
 - Xeon_X_5570 (06_26)
 - Xeon_E_7450 (06_29)
