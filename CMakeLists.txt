@@ -3,7 +3,7 @@ INCLUDE (CheckLibraryExists)
 find_package(PkgConfig)
 
 
-project (numap)
+project (numap C)
 set (NUMAP_VERSION_MAJOR 0)
 set (NUMAP_VERSION_MINOR 1)
 
