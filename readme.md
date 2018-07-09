@@ -9,24 +9,24 @@ library is to provide high level abstraction for:
 
 ## Supported processors 
 
-### Intel processors with family_model information (decimal notation)
+### Intel processors with family_model information (decimal / hexadecimal notations)
 
-- Xeon_X_5570 (06_26)
-- Xeon_E_7450 (06_29)
-- I7_870 (06_30)
-- I5_2520 (06_42)
-- WESTMERE_EP (06_44)
-- SANDY_BRIDGE_EP (06_45)
-- I7_3770 (06_58)
-- I5_4670 (06_60)
-- I7_5960X (06_63)
-- I7_4600U (06_69)
-- KABY_LAKE (06_158)
-- KABY_LAKE - HQ decline (06_142)
+- Nehalem - Gainestown decline (06_26 / 06_1A)
+- Nehalem - Lynfield decline (06_30 / 06_1E)
+- Sandy Bridge (06_42 / 06_2A)
+- Westmere - EP decline (06_44 / 06_2C)
+- Sandy Bridge - Romley EP decline (06_45 / 06_2D)
+- Ivy Bridge (06_58 / 06_3A)
+- Haswell - DT decline  (06_60 / 06_3C)
+- Ivy Bridge - E decline (06_62 / 06_3E)
+- Haswell - E decline (06_63 / 06_3F)
+- Haswell - ULT decline (06_69 / 06_45)
+- Kaby Lake (06_142 / 06_8E)
+- Kaby Lake - HQ decline (06_158 / 06_9E)
 
 ### AMD processors
 
- - Not yet supported
+ - On going development
 
 ## Folders Organization
 
