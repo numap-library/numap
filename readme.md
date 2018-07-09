@@ -9,7 +9,7 @@ library is to provide high level abstraction for:
 
 ## Supported processors 
 
-### Intel processors with family_model information (decimal noation)
+### Intel processors with family_model information (decimal notation)
 
 - Xeon_X_5570 (06_26)
 - Xeon_E_7450 (06_29)
@@ -20,8 +20,9 @@ library is to provide high level abstraction for:
 - I7_3770 (06_58)
 - I5_4670 (06_60)
 - I7_5960X (06_63)
-- I7_46OOU (06_69)
+- I7_4600U (06_69)
 - KABY_LAKE (06_158)
+- KABY_LAKE - HQ decline (06_142)
 
 ### AMD processors
 
@@ -29,14 +30,13 @@ library is to provide high level abstraction for:
 
 ## Folders Organization
 
-- *examples*: contains some examples showing how to use numap. One of
-  these examples is a memory bandwidth reporting live tool.
+- `examples`: contains some examples showing how to use numap.
 
-- *include*: contains numap headers
+- `include`: contains numap headers
 
-- *src*: contains numap implementation files
+- `src`: contains numap implementation files
 
-- *Makefile*: is a Makefile building both the library and the examples
+- `Makefile`: is a Makefile building both the library and the examples
 
 ## Dependencies
 
