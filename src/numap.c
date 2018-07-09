@@ -118,15 +118,6 @@ struct archi I7_4600U = { .id = 0x06 | 0x45 << 8, // 06_69
 						  .counting_write_event = NOT_SUPPORTED
 };
 
-struct archi I7_7820HQ = { .id = 0x06 | 0x9E << 8, // 06_158
-						  .name = "I7-7820 based on  Kaby Lake micro arch - Kaby Lake-HQ decline - 7th generation Intel Core",
-						  .sampling_read_event = "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
-						  .sampling_write_event = "MEM_INST_RETIRED:ALL_STORES",
-						  .counting_read_event = NOT_SUPPORTED,
-						  .counting_write_event = NOT_SUPPORTED
-};
-
-
 struct archi I7_7600U = { .id = 0x06 | 0x8E << 8, // 06_142
 						  .name = "I7-7600U based on Kaby Lake micro arch - Kaby Lake decline - 7th generation Intel Core",
 						  .sampling_read_event = "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
@@ -135,6 +126,13 @@ struct archi I7_7600U = { .id = 0x06 | 0x8E << 8, // 06_142
 						  .counting_write_event = NOT_SUPPORTED
 };
 
+struct archi I7_7820HQ = { .id = 0x06 | 0x9E << 8, // 06_158
+						  .name = "I7-7820 based on  Kaby Lake micro arch - Kaby Lake-HQ decline - 7th generation Intel Core",
+						  .sampling_read_event = "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
+						  .sampling_write_event = "MEM_INST_RETIRED:ALL_STORES",
+						  .counting_read_event = NOT_SUPPORTED,
+						  .counting_write_event = NOT_SUPPORTED
+};
 
 
 static struct archi *supported_archs[NB_SUPPORTED_ARCHS] = {
@@ -148,8 +146,9 @@ static struct archi *supported_archs[NB_SUPPORTED_ARCHS] = {
   &I7_5960X,
   &I5_4670,
   &I7_4600U,
+  &I7_7600U,
   &I7_7820HQ,
-  &I7_7600U};
+};
 
 static struct archi * get_archi(unsigned int archi_id) {
   int i;
