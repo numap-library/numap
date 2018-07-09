@@ -254,6 +254,6 @@ Thread 1: 0        remote memory                  0.000%
 Thread 1: 0        unknown l3 miss                0.000%
 ```
 
-Congrats! Numap is set up for your machine. 
+Congrats, numap is set up for your machine!
 
 Don't forget to push your modifications to github of course :)
