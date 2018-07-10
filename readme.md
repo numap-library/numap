@@ -50,12 +50,13 @@ library is to provide high level abstraction for:
 The goal is to fill up numap's data structures that look like this : 
 
 ``` C
-struct archi your_machine_code_name = { .id = /* A VALUE */ | /* A VALUE */ << 8, 
-			 .name = "Your description of the machine",
-			 .sampling_read_event= " .... ",
-			 .sampling_write_event=" .... ",
-			 .counting_read_event=" .... ",
-			 .counting_write_event=" ... "
+struct archi your_machine_code_name = { 
+	.id = /* A VALUE */ | /* A VALUE */ << 8, 
+   	.name = "Your description of the machine",
+	.sampling_read_event= " .... ",
+	.sampling_write_event=" .... ",
+	.counting_read_event=" .... ",
+	.counting_write_event=" ... "
 };
 ```
 
@@ -170,12 +171,11 @@ The numap's struct we need to define thus looks like:
 
 ``` C
 struct archi SANDY_BRIDGE_EP = { .id = 0x06 | 0x2D << 8, // 06_45
-			 .name   =    "Xeon_E5_2630   based   on    Sandy   Bridge
-			 micro-arch - Romley EP decline",
-			 .sampling_read_event= "MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
-			 .sampling_write_event="MEM_TRANS_RETIRED:PRECISE_STORE",
-			 .counting_read_event= NOT_SUPPORTED
-			 .counting_write_event= NOT_SUPPORTED
+	.name   =    "Sandy Bridge micro-arch - Romley EP decline",
+	.sampling_read_event= "MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
+	.sampling_write_event="MEM_TRANS_RETIRED:PRECISE_STORE",
+	.counting_read_event= NOT_SUPPORTED
+	.counting_write_event= NOT_SUPPORTED
 };
 ```
 
