@@ -31,7 +31,9 @@ struct archi {
 
 #define NB_SUPPORTED_ARCHS 12
 
-struct archi Xeon_X_5570 = {
+// Processors:
+//   - Xeon X5570 (server DP)
+struct archi _06_1A_NEHALEM_GAINESTOWN = {
   .id = 0x06 | 0x1A << 8, // 06_26
   .name = "Xeon_X_5570 based on Nehalem micro arch - Gainestown decline",
   .sampling_read_event = "MEM_INST_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
@@ -40,7 +42,9 @@ struct archi Xeon_X_5570 = {
   .counting_write_event = NOT_SUPPORTED
 };
 
-struct archi I7_870 = {
+// Processors:
+//   - Core i7 870 (desktop)
+struct archi _06_1E_NEHALEM_LYNFIELD = {
   .id = 0x06 | 0x1E << 8, // 06_30
   .name = "I7_870 based on Nehalem micro arch - Lynfield decline",
   .sampling_read_event = "MEM_INST_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
@@ -49,8 +53,9 @@ struct archi I7_870 = {
   .counting_write_event = NOT_SUPPORTED
 };
 
-
-struct archi I5_2520 = {
+// Processors:
+//   - Core i5 2520 (mobile)
+struct archi _06_2A_SANDY_BRIDGE = {
   .id = 0x06 | 0x2A << 8, // 06_42
   .name = "I5_2520 based on Sandy Bridge micro arch - Sandy Bridge decline - 2nd generation Intel Core",
   // NOTE: in the Intel SDM, read sampling event is MEM_TRANS_RETIRED:LOAD_LATENCY.
@@ -62,7 +67,8 @@ struct archi I5_2520 = {
   .counting_write_event = NOT_SUPPORTED
 };
 
-struct archi WESTMERE_EP = {
+// Processors:
+struct archi _06_2C_WESTMERE_EP = {
   .id = 0x06 | 0x2C << 8, // O6_44
   .name = "Westmere-Ep",
   .sampling_read_event= "MEM_INST_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
@@ -71,18 +77,20 @@ struct archi WESTMERE_EP = {
   .counting_write_event = NOT_SUPPORTED
 };
 
-
-struct archi SANDY_BRIDGE_EP = {
+// Processors:
+//   - Xeon E5 2603 (server)
+struct archi _06_2D_SANDY_BRIDGE_EP = {
   .id = 0x06 | 0x2D << 8, // 06_45
-  .name   =    "Sandy   Bridge micro-arch - Romley EP decline",
+  .name   =    "Sandy Bridge micro-arch - Romley EP decline",
   .sampling_read_event= "MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
   .sampling_write_event="MEM_TRANS_RETIRED:PRECISE_STORE",
   .counting_read_event= NOT_SUPPORTED,
   .counting_write_event= NOT_SUPPORTED
 };
 
-
-struct archi I7_3770 = {
+// Processors:
+//   - Core i7 3770 (desktop)
+struct archi _06_3A_IVY_BRIDGE = {
   .id = 0x06 | 0x3A << 8, // 06_58
   .name = "I7_3770 based on Ivy Bridge micro arch - Ivy Bridge decline - 3rd generation Intel Core",
   .sampling_read_event = "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
@@ -91,18 +99,22 @@ struct archi I7_3770 = {
   .counting_write_event = NOT_SUPPORTED
 };
 
-struct archi I5_4670 = {
+// Processors:
+//   - Core i5 4670 (desktop)
+struct archi _06_3C_HASWELL_DT = {
   .id = 0x06 | 0x3C << 8, // 06_60
-  .name = "I5-4670 based on Haswell micro arch - Haswell-DT decline - 4th generation Intel Core",
+  .name = "Haswell micro arch - Haswell-DT decline - 4th generation Intel Core",
   .sampling_read_event = "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
   .sampling_write_event = "MEM_UOPS_RETIRED:ALL_STORES",
   .counting_read_event = NOT_SUPPORTED,
   .counting_write_event = NOT_SUPPORTED
 };
 
-struct archi Xeon_E5_2660 = {
+// Processors:
+//   - Xeon E5 2660 (server)
+struct archi _06_3E_IVY_BRIDGE_E = {
   .id = 0x06 | 0x3E << 8, // 06_62
-  .name = "Xeon_E5_2660 based on Ivy Bridge micro arch - Ivy Bridge-E decline - 3rd generation Intel Core",
+  .name = "Ivy Bridge micro arch - Ivy Bridge-E decline - 3rd generation Intel Core",
   // NOTE: in the Intel SDM, read sampling event is MEM_TRANS_RETIRED:LOAD_LATENCY.
   // In practice this event does not work. As a consequence we use the event below
   // which is the one used by perf mem record and reported by the pfm library
@@ -112,34 +124,42 @@ struct archi Xeon_E5_2660 = {
   .counting_write_event = NOT_SUPPORTED
 };
 
-struct archi I7_5960X = {
+// Processors:
+//   - Core i7 extreme 5960X (desktop)
+struct archi _06_3F_HASWELL_E = {
   .id = 0x06 | 0x3F << 8, // 06_63
-  .name = "I7_5960X based on Haswell micro arch - Haswell-E decline - 4th generation Intel Core",
+  .name = "Haswell micro arch - Haswell-E decline - 4th generation Intel Core",
   .sampling_read_event = "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
   .sampling_write_event = "MEM_UOPS_RETIRED:ALL_STORES",
   .counting_read_event = NOT_SUPPORTED,
   .counting_write_event = NOT_SUPPORTED
 };
 
-struct archi I7_4600U = {
+// Processors:
+//   - Core i7 4600U (mobile)
+struct archi _06_45_HASWELL_ULT = {
   .id = 0x06 | 0x45 << 8, // 06_69
-  .name = "I7-46OOU based on Haswell micro arch - Haswell-ULT decline - 4th generation Intel Core",
+  .name = "Haswell micro arch - Haswell-ULT decline - 4th generation Intel Core",
   .sampling_read_event = "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
   .sampling_write_event = "MEM_UOPS_RETIRED:ALL_STORES",
   .counting_read_event = NOT_SUPPORTED,
   .counting_write_event = NOT_SUPPORTED
 };
 
-struct archi I7_7600U = {
+// Processors:
+//   - Core i7 7600U (mobile low/medium power)
+struct archi _06_8E_KABY_LAKE = {
   .id = 0x06 | 0x8E << 8, // 06_142
-  .name = "I7-7600U based on Kaby Lake micro arch - Kaby Lake decline - 7th generation Intel Core",
+  .name = "Kaby Lake micro arch - Kaby Lake decline - 7th generation Intel Core",
   .sampling_read_event = "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
   .sampling_write_event = "MEM_INST_RETIRED:ALL_STORES",
   .counting_read_event = NOT_SUPPORTED,
   .counting_write_event = NOT_SUPPORTED
 };
 
-struct archi I7_7820HQ = {
+// Processors:
+//   - Core i7 7820HQ (mobile high power)
+struct archi _06_9E_KABY_LAKE_HQ = {
   .id = 0x06 | 0x9E << 8, // 06_158
   .name = "I7-7820 based on  Kaby Lake micro arch - Kaby Lake-HQ decline - 7th generation Intel Core",
   .sampling_read_event = "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
@@ -150,18 +170,18 @@ struct archi I7_7820HQ = {
 
 
 static struct archi *supported_archs[NB_SUPPORTED_ARCHS] = {
-  &Xeon_X_5570,
-  &I7_870,
-  &WESTMERE_EP,
-  &SANDY_BRIDGE_EP,
-  &I5_2520,
-  &Xeon_E5_2660,
-  &I7_3770,
-  &I7_5960X,
-  &I5_4670,
-  &I7_4600U,
-  &I7_7600U,
-  &I7_7820HQ,
+  &_06_1A_NEHALEM_GAINESTOWN,
+  &_06_1E_NEHALEM_LYNFIELD,
+  &_06_2A_SANDY_BRIDGE,
+  &_06_2C_WESTMERE_EP,
+  &_06_2D_SANDY_BRIDGE_EP,
+  &_06_3A_IVY_BRIDGE,
+  &_06_3C_HASWELL_DT,
+  &_06_3E_IVY_BRIDGE_E,
+  &_06_3F_HASWELL_E,
+  &_06_45_HASWELL_ULT,
+  &_06_8E_KABY_LAKE,
+  &_06_9E_KABY_LAKE_HQ,
 };
 
 static struct archi * get_archi(unsigned int archi_id) {
