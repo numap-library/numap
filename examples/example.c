@@ -110,9 +110,10 @@ int main() {
 
   // Start memory read access sampling
   printf("\nStarting memory read sampling");
+  fflush(stdout);
   res = numap_sampling_read_start(&sm);
   if(res < 0) {
-    fprintf(stderr, "numap_sampling_start error : %s\n", numap_error_message(res));
+    fprintf(stderr, " -> numap_sampling_start error : %s\n", numap_error_message(res));
     return -1;
   }
   pthread_barrier_wait(&barrier);
@@ -156,10 +157,11 @@ int main() {
   sm.tids[1] = tid_1;
 
   // Start memory write access sampling
-  printf("\nStarting memory write sampling\n");
+  printf("\nStarting memory write sampling");
+  fflush(stdout);
   res = numap_sampling_write_start(&sm);
   if(res < 0) {
-    fprintf(stderr, "numap_sampling_start error : %s\n", numap_error_message(res));
+    fprintf(stderr, " -> numap_sampling_start error : %s\n", numap_error_message(res));
     return -1;
   }
   pthread_barrier_wait(&barrier);
@@ -173,7 +175,7 @@ int main() {
   }
 
   // Print memory write sampling results
-  printf("Memory write sampling results\n");
+  printf("\nMemory write sampling results\n");
   numap_sampling_write_print(&sm, 0);
 
   /* // Start memory controler read and writes counting */
