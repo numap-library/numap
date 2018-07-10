@@ -71,7 +71,7 @@ struct archi _06_2A_SANDY_BRIDGE = {
 struct archi _06_2C_WESTMERE_EP = {
   .id = 0x06 | 0x2C << 8, // O6_44
   .name = "Westmere-Ep",
-  .sampling_read_event= "MEM_INST_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
+  .sampling_read_event = "MEM_INST_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
   .sampling_write_event = NOT_SUPPORTED,
   .counting_read_event = NOT_SUPPORTED,
   .counting_write_event = NOT_SUPPORTED
@@ -79,13 +79,22 @@ struct archi _06_2C_WESTMERE_EP = {
 
 // Processors:
 //   - Xeon E5 2603 (server)
+// Notes:
+// We had problem with Xeon E5 2603 so for now we don't
+// support this architecture anymore. Looking at perf mem
+// record, precise_ip must be set to 0 on this architecture.
+// This is not coherent with what PFM and the Intel SDM say.
+// Also, load sampling does not produce any sample with
+// perf mem -t load record
 struct archi _06_2D_SANDY_BRIDGE_EP = {
   .id = 0x06 | 0x2D << 8, // 06_45
   .name   =    "Sandy Bridge micro-arch - Romley EP decline",
-  .sampling_read_event= "MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
-  .sampling_write_event="MEM_TRANS_RETIRED:PRECISE_STORE",
-  .counting_read_event= NOT_SUPPORTED,
-  .counting_write_event= NOT_SUPPORTED
+  /* .sampling_read_event = "MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3", */
+  /* .sampling_write_event = "MEM_TRANS_RETIRED:PRECISE_STORE", */
+  .sampling_read_event = NOT_SUPPORTED,
+  .sampling_write_event = NOT_SUPPORTED,
+  .counting_read_event = NOT_SUPPORTED,
+  .counting_write_event = NOT_SUPPORTED
 };
 
 // Processors:
