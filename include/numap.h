@@ -11,9 +11,10 @@
 #define ERROR_NUMAP_ALREADY_STARTED	              -5
 #define ERROR_NUMAP_STOP_BEFORE_START                 -6
 #define ERROR_NUMAP_ARCH_NOT_SUPPORTED                -7
-#define ERROR_NUMAP_WRITE_SAMPLING_ARCH_NOT_SUPPORTED -8
-#define ERROR_PFM                                     -9
-#define ERROR_READ                                    -10
+#define ERROR_NUMAP_READ_SAMPLING_ARCH_NOT_SUPPORTED  -9
+#define ERROR_NUMAP_WRITE_SAMPLING_ARCH_NOT_SUPPORTED -10
+#define ERROR_PFM                                     -11
+#define ERROR_READ                                    -12
 
 #define rmb()		asm volatile("lfence" ::: "memory")
 

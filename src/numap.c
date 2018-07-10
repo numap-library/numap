@@ -323,6 +323,8 @@ const char *numap_error_message(int error) {
     return "libnumap: start called again before stop";
   case ERROR_NUMAP_ARCH_NOT_SUPPORTED:
     return concat("libnumap: architecture not supported: ", model_name);
+  case ERROR_NUMAP_READ_SAMPLING_ARCH_NOT_SUPPORTED:
+    return concat("libnumap: read sampling not supported on architecture: ", model_name);
   case ERROR_NUMAP_WRITE_SAMPLING_ARCH_NOT_SUPPORTED:
     return concat("libnumap: write sampling not supported on architecture: ", model_name);
   case ERROR_PERF_EVENT_OPEN:
@@ -537,8 +539,21 @@ int __numap_sampling_start(struct numap_sampling_measure *measure, struct perf_e
   return 0;
 }
 
+int numap_sampling_read_supported() {
+
+  if (strcmp(current_archi->sampling_read_event, NOT_SUPPORTED) == 0) {
+    return 0;
+  }
+  return 1;
+}
+
 int numap_sampling_read_start_generic(struct numap_sampling_measure *measure, uint64_t sample_type) {
 
+  // Checks that read sampling is supported before calling pfm
+  if (!numap_sampling_read_supported()) {
+    return ERROR_NUMAP_READ_SAMPLING_ARCH_NOT_SUPPORTED;
+  }
+  
   // Set attribute parameter for perf_event_open using pfmlib
   struct perf_event_attr pe_attr;
   memset(&pe_attr, 0, sizeof(pe_attr));
