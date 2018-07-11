@@ -22,6 +22,7 @@ library is to provide high level abstraction for:
 - Haswell - ULT decline (06_69 / 06_45)
 - Kaby Lake (06_142 / 06_8E)
 - Kaby Lake - HQ decline (06_158 / 06_9E)
+- Sky Lake - HQ decline (06_94 / 06_5E)
 
 ### AMD processors
 
