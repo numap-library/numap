@@ -29,7 +29,7 @@ struct archi {
   const char *counting_write_event;
 };
 
-#define NB_SUPPORTED_ARCHS 12
+#define NB_SUPPORTED_ARCHS 13
 
 // Processors:
 //   - Xeon X5570 (server DP)
@@ -156,6 +156,17 @@ struct archi _06_45_HASWELL_ULT = {
 };
 
 // Processors:
+//   - Core i5 6300HQ (mobile)
+struct archi _06_5E_SKY_LAKE_HQ = { 
+  .id = 0x06 | 0x5E << 8, // 06_94
+  .name = "Sky Lake micro arch - Sky Lake decline  - 5th generation Intel Core",
+  .sampling_read_event = "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
+  .sampling_write_event = "MEM_INST_RETIRED:ALL_STORES",
+  .counting_read_event = NOT_SUPPORTED,
+  .counting_write_event = NOT_SUPPORTED
+};
+
+// Processors:
 //   - Core i7 7600U (mobile low/medium power)
 struct archi _06_8E_KABY_LAKE = {
   .id = 0x06 | 0x8E << 8, // 06_142
@@ -191,6 +202,7 @@ static struct archi *supported_archs[NB_SUPPORTED_ARCHS] = {
   &_06_45_HASWELL_ULT,
   &_06_8E_KABY_LAKE,
   &_06_9E_KABY_LAKE_HQ,
+  &_06_5E_SKY_LAKE_HQ,
 };
 
 static struct archi * get_archi(unsigned int archi_id) {
