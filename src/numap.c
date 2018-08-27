@@ -29,7 +29,7 @@ struct archi {
   const char *counting_write_event;
 };
 
-#define NB_SUPPORTED_ARCHS 13
+#define NB_SUPPORTED_ARCHS 14
 
 // Processors:
 //   - Xeon X5570 (server DP)
@@ -120,6 +120,17 @@ struct archi _06_3C_HASWELL_DT = {
 };
 
 // Processors:
+//   - Xeon E5-2620 v4 (server)
+struct archi _06_4F_BROADWELL = {
+  .id = 0x06 | 0x4F << 8, // 06_79
+  .name = "Broadwell micro arch",
+  .sampling_read_event = "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
+  .sampling_write_event = "MEM_UOPS_RETIRED:ALL_STORES",
+  .counting_read_event = NOT_SUPPORTED,
+  .counting_write_event = NOT_SUPPORTED
+};
+
+// Processors:
 //   - Xeon E5 2660 (server)
 struct archi _06_3E_IVY_BRIDGE_E = {
   .id = 0x06 | 0x3E << 8, // 06_62
@@ -197,6 +208,7 @@ static struct archi *supported_archs[NB_SUPPORTED_ARCHS] = {
   &_06_2D_SANDY_BRIDGE_EP,
   &_06_3A_IVY_BRIDGE,
   &_06_3C_HASWELL_DT,
+  &_06_4F_BROADWELL,
   &_06_3E_IVY_BRIDGE_E,
   &_06_3F_HASWELL_E,
   &_06_45_HASWELL_ULT,
