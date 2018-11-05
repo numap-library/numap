@@ -31,6 +31,12 @@ struct archi {
 
 #define NB_SUPPORTED_ARCHS 14
 
+/* If your Intel CPU is not supported by Numap, you need to add a new architecture:
+ * .id can be found by running lscpu (CPU Familly | Model <<8)
+ * .sampling_read_event and .sampling_write_event can be found in the Intel Software Developpers Manuel (Chapter 19)
+ */
+
+
 // Processors:
 //   - Xeon X5570 (server DP)
 struct archi _06_1A_NEHALEM_GAINESTOWN = {
