@@ -344,7 +344,7 @@ const char *numap_error_message(int error) {
   case ERROR_PERF_EVENT_OPEN:
     return concat(pe_error, strerror(errno));
   case ERROR_PFM:
-    return concat(pfm_error, pfm_strerror(curr_err));
+    return concat("%s%s",pfm_error, pfm_strerror(curr_err));
   case ERROR_READ:
     return "libnumap: error while trying to read counter";
   default:
