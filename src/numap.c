@@ -121,6 +121,7 @@ break;
 
     break;
     
+  case CPU_MODEL(6, 60):
   case CPU_MODEL(6, 63):
   case CPU_MODEL(6, 69):
   case CPU_MODEL(6, 70):
