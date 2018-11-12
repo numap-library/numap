@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -10,6 +11,7 @@
 #include <inttypes.h>
 #include <sys/types.h>
 #include <sys/syscall.h>
+#include <stdarg.h>
 #include <err.h>
 #include <time.h>
 #include <numa.h>
@@ -22,14 +24,12 @@
 
 struct archi {
   unsigned int id;
-  const char *name;
-  const char *sampling_read_event;
-  const char *sampling_write_event;
-  const char *counting_read_event;
-  const char *counting_write_event;
+  char name[256];
+  char sampling_read_event[256];
+  char sampling_write_event[256];
+  char counting_read_event[256];
+  char counting_write_event[256];
 };
-
-#define NB_SUPPORTED_ARCHS 15
 
 /* If your Intel CPU is not supported by Numap, you need to add a new architecture:
  * .id can be found by running lscpu (CPU Familly | Model <<8)
@@ -37,213 +37,183 @@ struct archi {
  */
 
 
-// Processors:
-//   - Xeon X5570 (server DP)
-struct archi _06_1A_NEHALEM_GAINESTOWN = {
-  .id = 0x06 | 0x1A << 8, // 06_26
-  .name = "Xeon_X_5570 based on Nehalem micro arch - Gainestown decline",
-  .sampling_read_event = "MEM_INST_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
-  .sampling_write_event = NOT_SUPPORTED,
-  .counting_read_event = NOT_SUPPORTED,
-  .counting_write_event = NOT_SUPPORTED
-};
+#define CPU_MODEL(family, model) ((family) | (model) <<8)
 
-// Processors:
-//   - Core i7 870 (desktop)
-struct archi _06_1E_NEHALEM_LYNFIELD = {
-  .id = 0x06 | 0x1E << 8, // 06_30
-  .name = "I7_870 based on Nehalem micro arch - Lynfield decline",
-  .sampling_read_event = "MEM_INST_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
-  .sampling_write_event = NOT_SUPPORTED,
-  .counting_read_event = NOT_SUPPORTED,
-  .counting_write_event = NOT_SUPPORTED
-};
+static void get_archi(unsigned int archi_id, struct archi * arch) {
+  arch->id=archi_id;
 
-// Processors:
-//   - Core i5 2520 (mobile)
-struct archi _06_2A_SANDY_BRIDGE = {
-  .id = 0x06 | 0x2A << 8, // 06_42
-  .name = "I5_2520 based on Sandy Bridge micro arch - Sandy Bridge decline - 2nd generation Intel Core",
+  snprintf(arch->name, 256, "Unknown architecture");
+  snprintf(arch->sampling_read_event, 256, NOT_SUPPORTED);
+  snprintf(arch->sampling_write_event, 256, NOT_SUPPORTED);
+  snprintf(arch->counting_read_event, 256, NOT_SUPPORTED);
+  snprintf(arch->counting_write_event, 256, NOT_SUPPORTED);
+
+  switch (archi_id)  {
+  case CPU_MODEL(6,46):
+  case CPU_MODEL(6,30):
+  case CPU_MODEL(6,26):
+  case CPU_MODEL(6,31):
+
+    snprintf(arch->name, 256, "Nehalem micro arch");
+    snprintf(arch->sampling_read_event, 256,  "MEM_INST_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3");
+    break;
+
+  case CPU_MODEL(6, 44):
+  case CPU_MODEL(6, 47):
+  case CPU_MODEL(6, 37):
+    snprintf(arch->name, 256, "Westmere micro arch");
+    snprintf(arch->sampling_read_event, 256, "MEM_INST_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3");
+    break;
+
+  case CPU_MODEL(15, 6):
+    snprintf(arch->name, 256, "Netburst micro arch");
+    break;
+
+  case CPU_MODEL(15, 4):
+  case CPU_MODEL(15, 3):
+    snprintf(arch->name, 256, "Prescott micro arch");
+    break;
+
+  case CPU_MODEL(15, 2):
+    snprintf(arch->name, 256, "Northwood micro arch");
+    break;
+  case CPU_MODEL(15, 1):
+    snprintf(arch->name, 256, "Willamette micro arch");
+    break;
+
+  case CPU_MODEL(11, 0):
+    snprintf(arch->name, 256, "Knights Ferry micro arch");
+    break;   
+  case CPU_MODEL(11, 1):
+    snprintf(arch->name, 256, "Knights Corner micro arch");
+    break;
+
+  case CPU_MODEL(6, 126):
+    snprintf(arch->name, 256, "Ice Lake micro arch");
+    break;
+    
+  case CPU_MODEL(6, 102):
+    snprintf(arch->name, 256, "Cannon Lake micro arch");
+    break;
+    
+  case CPU_MODEL(6, 158):
+  case CPU_MODEL(6, 142):
+    snprintf(arch->name, 256, "Kaby Lake micro arch");
+    snprintf(arch->sampling_read_event, 256, "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3");
+    snprintf(arch->sampling_write_event, 256, "MEM_INST_RETIRED:ALL_STORES");
+    break;
+    
+  case CPU_MODEL(6, 94):
+  case CPU_MODEL(6, 78):
+  case CPU_MODEL(6, 85):
+    snprintf(arch->name, 256, "Skylake micro arch");
+    snprintf(arch->sampling_read_event, 256, "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3");
+    snprintf(arch->sampling_write_event, 256, "MEM_UOPS_RETIRED:ALL_STORES");
+break;
+    
+  case CPU_MODEL(6, 79):
+  case CPU_MODEL(6, 86):
+  case CPU_MODEL(6, 71):
+  case CPU_MODEL(6, 61):
+    snprintf(arch->name, 256, "Broadwell micro arch");
+    snprintf(arch->sampling_read_event, 256, "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3");
+    snprintf(arch->sampling_write_event, 256, "MEM_UOPS_RETIRED:ALL_STORES");
+
+    break;
+    
+  case CPU_MODEL(6, 63):
+  case CPU_MODEL(6, 69):
+  case CPU_MODEL(6, 70):
+    snprintf(arch->name, 256, "Haswell micro arch");
+    snprintf(arch->sampling_read_event, 256, "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3");
+    snprintf(arch->sampling_write_event, 256, "MEM_UOPS_RETIRED:ALL_STORES");
+    break;
+    
+  case CPU_MODEL(6, 58):
+  case CPU_MODEL(6, 62):
+    snprintf(arch->name, 256, "Ivy Bridge micro arch");
+    // NOTE: in the Intel SDM, read sampling event is MEM_TRANS_RETIRED:LOAD_LATENCY.
+    // In practice this event does not work. As a consequence we use the event below
+    // which is the one used by perf mem record and reported by the pfm library
+    snprintf(arch->sampling_read_event, 256, "MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3");
+    snprintf(arch->sampling_write_event, 256, "MEM_TRANS_RETIRED:PRECISE_STORE");
+    //snprintf(arch->sampling_read_event, 256, "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3");
+    //snprintf(arch->sampling_write_event, 256, "MEM_TRANS_RETIRED:PRECISE_STORE");
+    break;
+    
+  case CPU_MODEL(6, 42):
+  case CPU_MODEL(6, 45):
+    snprintf(arch->name, 256, "Sandy Bridge micro arch");
   // NOTE: in the Intel SDM, read sampling event is MEM_TRANS_RETIRED:LOAD_LATENCY.
   // In practice this event does not work. As a consequence we use the event below
   // which is the one used by perf mem record and reported by the pfm library
-  .sampling_read_event = "MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
-  .sampling_write_event = "MEM_TRANS_RETIRED:PRECISE_STORE",
-  .counting_read_event = NOT_SUPPORTED,
-  .counting_write_event = NOT_SUPPORTED
-};
+    snprintf(arch->sampling_read_event, 256, "MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3");
+    snprintf(arch->sampling_write_event, 256, "MEM_TRANS_RETIRED:PRECISE_STORE");
+    break;
 
-// Processors:
-struct archi _06_2C_WESTMERE_EP = {
-  .id = 0x06 | 0x2C << 8, // O6_44
-  .name = "Westmere-Ep",
-  .sampling_read_event = "MEM_INST_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
-  .sampling_write_event = NOT_SUPPORTED,
-  .counting_read_event = NOT_SUPPORTED,
-  .counting_write_event = NOT_SUPPORTED
-};
+  case CPU_MODEL(6, 29):
+  case CPU_MODEL(6, 23):
+    snprintf(arch->name, 256, "Penryn micro arch");
+    break;
+    
+  case CPU_MODEL(6, 15):
+  case CPU_MODEL(6, 22):
+    snprintf(arch->name, 256, "Core micro arch");
+    break;
+    
+  case CPU_MODEL(6, 14):
+    snprintf(arch->name, 256, "Modified Pentium M micro arch");
+    break;
+    
+  case CPU_MODEL(6, 21):
+  case CPU_MODEL(6, 13):
+  case CPU_MODEL(6, 9):
+    snprintf(arch->name, 256, "Pentium M micro arch");
+    break;
 
-// Processors:
-//   - Xeon E5 2603 (server)
-// Notes:
-// We had problem with Xeon E5 2603 so for now we don't
-// support this architecture anymore. Looking at perf mem
-// record, precise_ip must be set to 0 on this architecture.
-// This is not coherent with what PFM and the Intel SDM say.
-// Also, load sampling does not produce any sample with
-// perf mem -t load record
-struct archi _06_2D_SANDY_BRIDGE_EP = {
-  .id = 0x06 | 0x2D << 8, // 06_45
-  .name   =    "Sandy Bridge micro-arch - Romley EP decline",
-  /* .sampling_read_event = "MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3", */
-  /* .sampling_write_event = "MEM_TRANS_RETIRED:PRECISE_STORE", */
-  .sampling_read_event = NOT_SUPPORTED,
-  .sampling_write_event = NOT_SUPPORTED,
-  .counting_read_event = NOT_SUPPORTED,
-  .counting_write_event = NOT_SUPPORTED
-};
+  case CPU_MODEL(6, 134):
+    snprintf(arch->name, 256, "Tremont micro arch");
+    break;
+    
+  case CPU_MODEL(6, 122):
+    snprintf(arch->name, 256, "Goldmont Plus micro arch");
+    break;
+    
+  case CPU_MODEL(6, 95):
+  case CPU_MODEL(6, 92):
+    snprintf(arch->name, 256, "Goldmont micro arch");
+    break;
+    
+  case CPU_MODEL(6, 76):
+    snprintf(arch->name, 256, "Airmont micro arch");
+    break;
+    
+  case CPU_MODEL(6, 55):
+  case CPU_MODEL(6, 74):
+  case CPU_MODEL(6, 77):
+  case CPU_MODEL(6, 93):
+    snprintf(arch->name, 256, "Silvermont micro arch");
+    break;
 
-// Processors:
-//   - Core i7 3770 (desktop)
-struct archi _06_3A_IVY_BRIDGE = {
-  .id = 0x06 | 0x3A << 8, // 06_58
-  .name = "I7_3770 based on Ivy Bridge micro arch - Ivy Bridge decline - 3rd generation Intel Core",
-  .sampling_read_event = "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
-  .sampling_write_event = "MEM_TRANS_RETIRED:PRECISE_STORE",
-  .counting_read_event = NOT_SUPPORTED,
-  .counting_write_event = NOT_SUPPORTED
-};
+  case CPU_MODEL(6, 39):
+  case CPU_MODEL(6, 53):
+  case CPU_MODEL(6, 54):
+    snprintf(arch->name, 256, "Saltwell micro arch");
+    break;
+    
+  case CPU_MODEL(6, 28):
+  case CPU_MODEL(6, 38):
+    snprintf(arch->name, 256, "Bonnell micro arch");
+    break;
 
-// Processors:
-//   - Core i5 4670 (desktop)
-struct archi _06_3C_HASWELL_DT = {
-  .id = 0x06 | 0x3C << 8, // 06_60
-  .name = "Haswell micro arch - Haswell-DT decline - 4th generation Intel Core",
-  .sampling_read_event = "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
-  .sampling_write_event = "MEM_UOPS_RETIRED:ALL_STORES",
-  .counting_read_event = NOT_SUPPORTED,
-  .counting_write_event = NOT_SUPPORTED
-};
-
-// Processors:
-//   - Xeon E5-2620 v4 (server)
-struct archi _06_4F_BROADWELL = {
-  .id = 0x06 | 0x4F << 8, // 06_79
-  .name = "Broadwell micro arch",
-  .sampling_read_event = "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
-  .sampling_write_event = "MEM_UOPS_RETIRED:ALL_STORES",
-  .counting_read_event = NOT_SUPPORTED,
-  .counting_write_event = NOT_SUPPORTED
-};
-
-// Processors:
-//   - Xeon Platinum 8160F (server)
-struct archi _06_55_SKYLAKE = {
-  .id = 0x06 | 0x55 << 8, // 06_85
-  .name = "Skylake micro arch",
-  .sampling_read_event = "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
-  .sampling_write_event = "MEM_UOPS_RETIRED:ALL_STORES",
-  .counting_read_event = NOT_SUPPORTED,
-  .counting_write_event = NOT_SUPPORTED
-};
-
-
-// Processors:
-//   - Xeon E5 2660 (server)
-struct archi _06_3E_IVY_BRIDGE_E = {
-  .id = 0x06 | 0x3E << 8, // 06_62
-  .name = "Ivy Bridge micro arch - Ivy Bridge-E decline - 3rd generation Intel Core",
-  // NOTE: in the Intel SDM, read sampling event is MEM_TRANS_RETIRED:LOAD_LATENCY.
-  // In practice this event does not work. As a consequence we use the event below
-  // which is the one used by perf mem record and reported by the pfm library
-  .sampling_read_event = "MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
-  .sampling_write_event = "MEM_TRANS_RETIRED:PRECISE_STORE",
-  .counting_read_event = NOT_SUPPORTED,
-  .counting_write_event = NOT_SUPPORTED
-};
-
-// Processors:
-//   - Core i7 extreme 5960X (desktop)
-struct archi _06_3F_HASWELL_E = {
-  .id = 0x06 | 0x3F << 8, // 06_63
-  .name = "Haswell micro arch - Haswell-E decline - 4th generation Intel Core",
-  .sampling_read_event = "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
-  .sampling_write_event = "MEM_UOPS_RETIRED:ALL_STORES",
-  .counting_read_event = NOT_SUPPORTED,
-  .counting_write_event = NOT_SUPPORTED
-};
-
-// Processors:
-//   - Core i7 4600U (mobile)
-struct archi _06_45_HASWELL_ULT = {
-  .id = 0x06 | 0x45 << 8, // 06_69
-  .name = "Haswell micro arch - Haswell-ULT decline - 4th generation Intel Core",
-  .sampling_read_event = "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
-  .sampling_write_event = "MEM_UOPS_RETIRED:ALL_STORES",
-  .counting_read_event = NOT_SUPPORTED,
-  .counting_write_event = NOT_SUPPORTED
-};
-
-// Processors:
-//   - Core i5 6300HQ (mobile)
-struct archi _06_5E_SKY_LAKE_HQ = { 
-  .id = 0x06 | 0x5E << 8, // 06_94
-  .name = "Sky Lake micro arch - Sky Lake decline  - 5th generation Intel Core",
-  .sampling_read_event = "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
-  .sampling_write_event = "MEM_INST_RETIRED:ALL_STORES",
-  .counting_read_event = NOT_SUPPORTED,
-  .counting_write_event = NOT_SUPPORTED
-};
-
-// Processors:
-//   - Core i7 7600U (mobile low/medium power)
-struct archi _06_8E_KABY_LAKE = {
-  .id = 0x06 | 0x8E << 8, // 06_142
-  .name = "Kaby Lake micro arch - Kaby Lake decline - 7th generation Intel Core",
-  .sampling_read_event = "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
-  .sampling_write_event = "MEM_INST_RETIRED:ALL_STORES",
-  .counting_read_event = NOT_SUPPORTED,
-  .counting_write_event = NOT_SUPPORTED
-};
-
-// Processors:
-//   - Core i7 7820HQ (mobile high power)
-struct archi _06_9E_KABY_LAKE_HQ = {
-  .id = 0x06 | 0x9E << 8, // 06_158
-  .name = "I7-7820 based on  Kaby Lake micro arch - Kaby Lake-HQ decline - 7th generation Intel Core",
-  .sampling_read_event = "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3",
-  .sampling_write_event = "MEM_INST_RETIRED:ALL_STORES",
-  .counting_read_event = NOT_SUPPORTED,
-  .counting_write_event = NOT_SUPPORTED
-};
-
-
-static struct archi *supported_archs[NB_SUPPORTED_ARCHS] = {
-  &_06_1A_NEHALEM_GAINESTOWN,
-  &_06_1E_NEHALEM_LYNFIELD,
-  &_06_2A_SANDY_BRIDGE,
-  &_06_2C_WESTMERE_EP,
-  &_06_2D_SANDY_BRIDGE_EP,
-  &_06_3A_IVY_BRIDGE,
-  &_06_3C_HASWELL_DT,
-  &_06_4F_BROADWELL,
-  &_06_55_SKYLAKE,
-  &_06_3E_IVY_BRIDGE_E,
-  &_06_3F_HASWELL_E,
-  &_06_45_HASWELL_ULT,
-  &_06_8E_KABY_LAKE,
-  &_06_9E_KABY_LAKE_HQ,
-  &_06_5E_SKY_LAKE_HQ,
-};
-
-static struct archi * get_archi(unsigned int archi_id) {
-  int i;
-  for (i = 0; i < NB_SUPPORTED_ARCHS; i++) {
-    if (archi_id == supported_archs[i]->id) {
-      return supported_archs[i];
-    }
+  case CPU_MODEL(6, 133):
+    snprintf(arch->name, 256, "Knights Mill micro arch");
+    break;
+    
+  case CPU_MODEL(6, 87):
+    snprintf(arch->name, 256, "Knights Landing micro arch");
+    break;
   }
-  return NULL;
 }
 
 unsigned char get_family(unsigned int archi_id) {
@@ -302,7 +272,8 @@ __attribute__((constructor)) void init(void) {
   }
   free(arg);
   fclose(cpuinfo);
-  current_archi = get_archi(family | model << 8);
+  current_archi = malloc(sizeof(struct archi));
+  get_archi(CPU_MODEL(family, model), current_archi);
 
   // Get numa configuration
   int available = numa_available();
@@ -342,18 +313,14 @@ __attribute__((constructor)) void init(void) {
   fclose(f);
 }
 
-char* concat(const char *s1, const char *s2) {
-  char *result = malloc(strlen(s1) + strlen(s2) + 1);
-  if (result == NULL) {
-    return "malloc failed in concat\n";
-  }
-  strcpy(result, s1);
-  strcat(result, s2);
+char* concat(const char *fmt, ...) {
+   va_list args;
+   va_start(args, fmt);
+   char* result = NULL;
+   vasprintf(&result, fmt, args);
   return result;
 }
-
-
-
+ 
 const char *numap_error_message(int error) {
   char *pe_error = "perf_event ==> ";
   char *pfm_error = "pfm ==> ";
@@ -365,11 +332,14 @@ const char *numap_error_message(int error) {
   case ERROR_NUMAP_ALREADY_STARTED:
     return "libnumap: start called again before stop";
   case ERROR_NUMAP_ARCH_NOT_SUPPORTED:
-    return concat("libnumap: architecture not supported: ", model_name);
+    return concat("libnumap: architecture not supported: %s (family %d, model %d)",
+		  model_name, get_family(current_archi->id), get_model(current_archi->id));
   case ERROR_NUMAP_READ_SAMPLING_ARCH_NOT_SUPPORTED:
-    return concat("libnumap: read sampling not supported on architecture: ", model_name);
+    return concat("libnumap: read sampling not supported on architecture: %s (family %d, model %d)",
+		  model_name, get_family(current_archi->id), get_model(current_archi->id));
   case ERROR_NUMAP_WRITE_SAMPLING_ARCH_NOT_SUPPORTED:
-    return concat("libnumap: write sampling not supported on architecture: ", model_name);
+    return concat("libnumap: write sampling not supported on architecture: %s (family %d, model %d)",
+		  model_name, get_family(current_archi->id), get_model(current_archi->id));
   case ERROR_PERF_EVENT_OPEN:
     return concat(pe_error, strerror(errno));
   case ERROR_PFM:
