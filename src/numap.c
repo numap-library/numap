@@ -314,17 +314,25 @@ __attribute__((constructor)) void init(void) {
   fclose(f);
 }
 
-char* concat(const char *fmt, ...) {
-   va_list args;
-   va_start(args, fmt);
-   char* result = NULL;
-   vasprintf(&result, fmt, args);
+char* concat(const char *s1, const char *s2) {
+  char *result = malloc(strlen(s1) + strlen(s2) + 1);
+  if (result == NULL) {
+    return "malloc failed in concat\n";
+  }
+  strcpy(result, s1);
+  strcat(result, s2);
+ return result;
+}
+
+char* build_string(const char *fmt, ...) {
+  va_list args;
+  va_start(args, fmt);
+  char* result = NULL;
+  vasprintf(&result, fmt, args);
   return result;
 }
  
 const char *numap_error_message(int error) {
-  char *pe_error = "perf_event ==> ";
-  char *pfm_error = "pfm ==> ";
   switch (error) {
   case ERROR_NUMAP_NOT_NUMA:
     return "libnumap: numa lib not available";
@@ -333,18 +341,18 @@ const char *numap_error_message(int error) {
   case ERROR_NUMAP_ALREADY_STARTED:
     return "libnumap: start called again before stop";
   case ERROR_NUMAP_ARCH_NOT_SUPPORTED:
-    return concat("libnumap: architecture not supported: %s (family %d, model %d)",
+    return build_string("libnumap: architecture not supported: %s (family %d, model %d)",
 		  model_name, get_family(current_archi->id), get_model(current_archi->id));
   case ERROR_NUMAP_READ_SAMPLING_ARCH_NOT_SUPPORTED:
-    return concat("libnumap: read sampling not supported on architecture: %s (family %d, model %d)",
+    return build_string("libnumap: read sampling not supported on architecture: %s (family %d, model %d)",
 		  model_name, get_family(current_archi->id), get_model(current_archi->id));
   case ERROR_NUMAP_WRITE_SAMPLING_ARCH_NOT_SUPPORTED:
-    return concat("libnumap: write sampling not supported on architecture: %s (family %d, model %d)",
+    return build_string("libnumap: write sampling not supported on architecture: %s (family %d, model %d)",
 		  model_name, get_family(current_archi->id), get_model(current_archi->id));
   case ERROR_PERF_EVENT_OPEN:
-    return concat(pe_error, strerror(errno));
+    return build_string("libnumap: error when calling perf_event_open: %s", strerror(errno));
   case ERROR_PFM:
-    return concat("%s%s",pfm_error, pfm_strerror(curr_err));
+    return build_string("libnumap: error when initializing pfm: %s", pfm_strerror(curr_err));
   case ERROR_READ:
     return "libnumap: error while trying to read counter";
   default:

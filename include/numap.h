@@ -77,6 +77,8 @@ struct __attribute__ ((__packed__)) mmap_sample {
   char filename[100];
 };
 
+char* concat(const char *s1, const char *s2);
+
 /**
  * Numap initialization function
  */
