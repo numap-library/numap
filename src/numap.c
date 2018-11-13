@@ -49,51 +49,18 @@ static void get_archi(unsigned int archi_id, struct archi * arch) {
   snprintf(arch->counting_write_event, 256, NOT_SUPPORTED);
 
   switch (archi_id)  {
-  case CPU_MODEL(6,46):
-  case CPU_MODEL(6,30):
-  case CPU_MODEL(6,26):
-  case CPU_MODEL(6,31):
-
-    snprintf(arch->name, 256, "Nehalem micro arch");
-    snprintf(arch->sampling_read_event, 256,  "MEM_INST_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3");
-    break;
-
-  case CPU_MODEL(6, 44):
-  case CPU_MODEL(6, 47):
-  case CPU_MODEL(6, 37):
-    snprintf(arch->name, 256, "Westmere micro arch");
-    snprintf(arch->sampling_read_event, 256, "MEM_INST_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3");
-    break;
-
-  case CPU_MODEL(15, 6):
-    snprintf(arch->name, 256, "Netburst micro arch");
-    break;
-
-  case CPU_MODEL(15, 4):
-  case CPU_MODEL(15, 3):
-    snprintf(arch->name, 256, "Prescott micro arch");
-    break;
-
-  case CPU_MODEL(15, 2):
-    snprintf(arch->name, 256, "Northwood micro arch");
-    break;
-  case CPU_MODEL(15, 1):
-    snprintf(arch->name, 256, "Willamette micro arch");
-    break;
-
-  case CPU_MODEL(11, 0):
-    snprintf(arch->name, 256, "Knights Ferry micro arch");
-    break;   
-  case CPU_MODEL(11, 1):
-    snprintf(arch->name, 256, "Knights Corner micro arch");
-    break;
-
   case CPU_MODEL(6, 126):
     snprintf(arch->name, 256, "Ice Lake micro arch");
+    /* Not tested. Let's assume these events are the same as the previous cpu generation */
+    snprintf(arch->sampling_read_event, 256, "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3");
+    snprintf(arch->sampling_write_event, 256, "MEM_INST_RETIRED:ALL_STORES");
     break;
     
   case CPU_MODEL(6, 102):
     snprintf(arch->name, 256, "Cannon Lake micro arch");
+    /* Not tested. Let's assume these events are the same as the previous cpu generation */
+    snprintf(arch->sampling_read_event, 256, "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3");
+    snprintf(arch->sampling_write_event, 256, "MEM_INST_RETIRED:ALL_STORES");
     break;
     
   case CPU_MODEL(6, 158):
@@ -109,7 +76,7 @@ static void get_archi(unsigned int archi_id, struct archi * arch) {
     snprintf(arch->name, 256, "Skylake micro arch");
     snprintf(arch->sampling_read_event, 256, "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3");
     snprintf(arch->sampling_write_event, 256, "MEM_UOPS_RETIRED:ALL_STORES");
-break;
+    break;
     
   case CPU_MODEL(6, 79):
   case CPU_MODEL(6, 86):
@@ -152,6 +119,57 @@ break;
     snprintf(arch->sampling_write_event, 256, "MEM_TRANS_RETIRED:PRECISE_STORE");
     break;
 
+  case CPU_MODEL(6,46):
+  case CPU_MODEL(6,30):
+  case CPU_MODEL(6,26):
+  case CPU_MODEL(6,31):
+    snprintf(arch->name, 256, "Nehalem micro arch");
+    snprintf(arch->sampling_read_event, 256,  "MEM_INST_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3");
+    break;
+
+  case CPU_MODEL(6, 44):
+  case CPU_MODEL(6, 47):
+  case CPU_MODEL(6, 37):
+    snprintf(arch->name, 256, "Westmere micro arch");
+    snprintf(arch->sampling_read_event, 256, "MEM_INST_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3");
+    break;
+
+
+    // Intel Xeon Phi CPUs (currently not supported)
+    // I'm not sure if PEBS is available on these cpus
+  case CPU_MODEL(6, 133):
+    snprintf(arch->name, 256, "Knights Mill micro arch");
+    break;
+    
+  case CPU_MODEL(6, 87):
+    snprintf(arch->name, 256, "Knights Landing micro arch");
+    break;
+
+    // Old Intel Xeon Phi CPUs
+  case CPU_MODEL(11, 0):
+    snprintf(arch->name, 256, "Knights Ferry micro arch");
+    break;   
+  case CPU_MODEL(11, 1):
+    snprintf(arch->name, 256, "Knights Corner micro arch");
+    break;
+
+    // Some old Intel arch (will probably never be supported)
+  case CPU_MODEL(15, 6):
+    snprintf(arch->name, 256, "Netburst micro arch");
+    break;
+
+  case CPU_MODEL(15, 4):
+  case CPU_MODEL(15, 3):
+    snprintf(arch->name, 256, "Prescott micro arch");
+    break;
+
+  case CPU_MODEL(15, 2):
+    snprintf(arch->name, 256, "Northwood micro arch");
+    break;
+  case CPU_MODEL(15, 1):
+    snprintf(arch->name, 256, "Willamette micro arch");
+    break;
+
   case CPU_MODEL(6, 29):
   case CPU_MODEL(6, 23):
     snprintf(arch->name, 256, "Penryn micro arch");
@@ -172,6 +190,7 @@ break;
     snprintf(arch->name, 256, "Pentium M micro arch");
     break;
 
+    // Intel Atom/ Celeron CPUs (will probably never be supported)
   case CPU_MODEL(6, 134):
     snprintf(arch->name, 256, "Tremont micro arch");
     break;
@@ -205,14 +224,6 @@ break;
   case CPU_MODEL(6, 28):
   case CPU_MODEL(6, 38):
     snprintf(arch->name, 256, "Bonnell micro arch");
-    break;
-
-  case CPU_MODEL(6, 133):
-    snprintf(arch->name, 256, "Knights Mill micro arch");
-    break;
-    
-  case CPU_MODEL(6, 87):
-    snprintf(arch->name, 256, "Knights Landing micro arch");
     break;
   }
 }

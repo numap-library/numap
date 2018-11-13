@@ -9,20 +9,25 @@ library is to provide high level abstraction for:
 
 ## Supported processors 
 
-### Intel processors with family_model information (decimal / hexadecimal notations)
+### Intel processors with family_model information (decimal notation)
 
-- Nehalem - Gainestown decline (06_26 / 06_1A)
-- Nehalem - Lynfield decline (06_30 / 06_1E)
-- Sandy Bridge (06_42 / 06_2A)
-- Westmere - EP decline (06_44 / 06_2C)
-- Ivy Bridge (06_58 / 06_3A)
-- Haswell - DT decline  (06_60 / 06_3C)
-- Ivy Bridge - E decline (06_62 / 06_3E)
-- Haswell - E decline (06_63 / 06_3F)
-- Haswell - ULT decline (06_69 / 06_45)
-- Kaby Lake (06_142 / 06_8E)
-- Kaby Lake - HQ decline (06_158 / 06_9E)
-- Sky Lake - HQ decline (06_94 / 06_5E)
+- Nehalem (06_26, 06_30, 06_31, 06_46)
+- Sandy Bridge (06_42, 06_45)
+- Westmere (06_37, 06_44, 06_44)
+- Ivy Bridge (06_58, 06_62)
+- Haswell  (06_60, 06_63, 06_69, 06_70)
+- Broadwell (06_61, 06_71, 06_79, 06_86)
+- Kaby Lake (06_142, 06_158)
+- Sky Lake (06_94, 06_78)
+- Cannon Lake (06-102)
+- Ice Lake (06_126)
+
+### Not implemented Intel processors:
+
+- Knights Ferry (11_00)
+- Knights Corner (11_01)
+- Knights Mill (06_133)
+- Knights Landing (06_87)
 
 ### AMD processors
 
@@ -48,32 +53,20 @@ library is to provide high level abstraction for:
 
 ### Intro
 
-The goal is to fill up numap's data structures that look like this : 
+The goal is to tell numap which read/write events to use on a specific architecture. The `get_archi` function specifies for each architecture which events to use:
 
 ``` C
-struct archi your_machine_code_name = { 
-	.id = /* A VALUE */ | /* A VALUE */ << 8, 
-   	.name = "Your description of the machine",
-	.sampling_read_event= " .... ",
-	.sampling_write_event=" .... ",
-	.counting_read_event=" .... ",
-	.counting_write_event=" ... "
-};
+switch(archi_id) {
+/* ... */
+  case CPU_MODEL(6, 158):
+  case CPU_MODEL(6, 142):
+    snprintf(arch->name, 256, "Kaby Lake micro arch");
+    snprintf(arch->sampling_read_event, 256, "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3");
+    snprintf(arch->sampling_write_event, 256, "MEM_INST_RETIRED:ALL_STORES");
+    break;
 ```
 
-More  precisely,  we  need  to  define  the  correct  values  for  the
-.sampling_read_event and .sampling_write_event fields. 
-
-Once this is done, simply add you_machine_code_name to the list 
-
-``` C
-static struct archi *supported_archs[NB_SUPPORTED_ARCHS] = {
-  ...
-};
-```
-
-and increment NB_SUPPORTED_ARCHS. 
-
+You can add a new architecture by adding a new case.
 
 ### Getting the correct info
 
@@ -114,13 +107,16 @@ power management:
 ```
 
 Amongst this  info, you are interested  in the lines "cpu  family" and
-"model". The associated  numbers needs to be  converted to hexadecimal
-and collated into the form 0xFAMILY_MODEL. 
+"model". Using them, you can add a new case:
+
+``` C
+case CPU_MODEL(cpu_family, model):
+```
 
 In our case, we get 
 
-```
-06_2D
+``` C
+case CPU_MODEL(06, 45):
 ```
 
 In  the Intel  documentations, this  will be  noted as  06_2DH (H  for
@@ -159,29 +155,23 @@ For the sampling of memory reads, you need something like:
 
 On some architectures, the info  provided in the general documentation
 is INCORRECT.  To  get the correct naming  of the sampling_read_event,
-one can  use libpfm (v>4.0.0).  Once  libpfm is built, it  provides us
-with  a binary  (libpfm/examples/shoevtinfo) that  prints the  list of
-available events.
+one can  use the `examples/showevtinfo` program provided by numap. This
+program prints the  list of available events.
 
 For our  example architecture, we  find that the  exact latency-fixing
 parameter is  called LATENCY_ABOVE_THRESHOLD instead  of LOAD_LATENCY.
 So be it! 
 
 
-The numap's struct we need to define thus looks like: 
+Thus, we modify get_archi to add these lines:
 
 ``` C
-struct archi SANDY_BRIDGE_EP = { .id = 0x06 | 0x2D << 8, // 06_45
-	.name   =    "Sandy Bridge micro-arch - Romley EP decline",
-	.sampling_read_event= "MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3",
-	.sampling_write_event="MEM_TRANS_RETIRED:PRECISE_STORE",
-	.counting_read_event= NOT_SUPPORTED
-	.counting_write_event= NOT_SUPPORTED
-};
+  case CPU_MODEL(6, 45):
+    snprintf(arch->name, 256, "Sandy Bridge micro arch");
+    snprintf(arch->sampling_read_event, 256, "MEM_TRANS_RETIRED:LATENCY_ABOVE_THRESHOLD:ldlat=3");
+    snprintf(arch->sampling_write_event, 256, "MEM_TRANS_RETIRED:PRECISE_STORE");
+    break;
 ```
-
-Note, the last  2 lines of the  struct are deprecated and  can thus be
-indicated as NOT_SUPPORTED. 
 
 ### Testing
 
