@@ -15,6 +15,7 @@
 #include <err.h>
 #include <time.h>
 #include <numa.h>
+#include <linux/version.h>
 
 #include "numap.h"
 
@@ -609,8 +610,12 @@ int numap_sampling_read_start_generic(struct numap_sampling_measure *measure, ui
   pe_attr.mmap = 1;
   pe_attr.task = 1;
   pe_attr.precise_ip = 2;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
   pe_attr.use_clockid=1;
   pe_attr.clockid = CLOCK_MONOTONIC_RAW;
+#else
+#warning NUMAP: using clockid is not possible on kernel version < 4.1. This feature will be disabled.
+#endif
   // Other parameters
   pe_attr.disabled = 1;
   pe_attr.exclude_kernel = 1;
