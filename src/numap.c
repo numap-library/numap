@@ -398,7 +398,7 @@ int numap_counting_init_measure(struct numap_counting_measure *measure) {
 }
 
 static void perf_overflow_handler(int signum, siginfo_t *info, void* ucontext) {
-    fprintf(stdout, "[%d] signum : %d (POLL_IN : %d, POLL_HUP : %d\n", getpid(), signum, POLL_IN, POLL_HUP);
+    fprintf(stdout, "\n--------------------------------------------------\n[%d] signum : %d, info->si_code : %d (POLL_IN : %d, POLL_HUP : %d\n", getpid(), signum, info->si_code, POLL_IN, POLL_HUP);
     ioctl(info->si_fd, PERF_EVENT_IOC_REFRESH, 1);
 }
 
@@ -429,6 +429,7 @@ int __numap_counting_start(struct numap_counting_measure *measure, struct perf_e
   struct sigaction sigoverflow;
   memset(&sigoverflow, 0, sizeof(struct sigaction));
   sigoverflow.sa_sigaction = perf_overflow_handler;
+  sigoverflow.sa_flags = SA_SIGINFO;
 
   if (sigaction(SIGIO, &sigoverflow, NULL) < 0)
   {
@@ -443,14 +444,14 @@ int __numap_counting_start(struct numap_counting_measure *measure, struct perf_e
     fcntl(measure->fd_reads[node], F_SETSIG, SIGIO);
     fcntl(measure->fd_reads[node], F_SETOWN, getpid());
     ioctl(measure->fd_reads[node], PERF_EVENT_IOC_RESET, 0);
-    ioctl(measure->fd_reads[node], PERF_EVENT_IOC_ENABLE, 0);
     ioctl(measure->fd_reads[node], PERF_EVENT_IOC_REFRESH, 1);
+    ioctl(measure->fd_reads[node], PERF_EVENT_IOC_ENABLE, 0);
     fcntl(measure->fd_writes[node], F_SETFL, O_NONBLOCK|O_ASYNC);
     fcntl(measure->fd_writes[node], F_SETSIG, SIGIO);
     fcntl(measure->fd_writes[node], F_SETOWN, getpid());
     ioctl(measure->fd_writes[node], PERF_EVENT_IOC_RESET, 0);
-    ioctl(measure->fd_writes[node], PERF_EVENT_IOC_ENABLE, 0);
     ioctl(measure->fd_writes[node], PERF_EVENT_IOC_REFRESH, 1);
+    ioctl(measure->fd_writes[node], PERF_EVENT_IOC_ENABLE, 0);
   }
 
   return 0;
@@ -524,6 +525,17 @@ int numap_sampling_init_measure(struct numap_sampling_measure *measure, int nb_t
     measure->fd_per_tid[thread] = 0;
     measure->metadata_pages_per_tid[thread] = 0;
   }
+  struct sigaction sigoverflow;
+  memset(&sigoverflow, 0, sizeof(struct sigaction));
+  sigoverflow.sa_sigaction = perf_overflow_handler;
+  sigoverflow.sa_flags = SA_SIGINFO;
+
+  if (sigaction(SIGIO, &sigoverflow, NULL) < 0)
+  {
+	  fprintf(stderr, "could not set up signal handler\n");
+	  perror("sigaction");
+	  exit(EXIT_FAILURE);
+  }
  
   return 0;
 }
@@ -532,9 +544,12 @@ int numap_sampling_init_measure(struct numap_sampling_measure *measure, int nb_t
 static int __numap_sampling_resume(struct numap_sampling_measure *measure) {
   int thread;
   for (thread = 0; thread < measure->nb_threads; thread++) {
+    fcntl(measure->fd_per_tid[thread], F_SETFL, O_NONBLOCK|O_ASYNC);
+    fcntl(measure->fd_per_tid[thread], F_SETSIG, SIGIO);
+    fcntl(measure->fd_per_tid[thread], F_SETOWN, getpid());
     ioctl(measure->fd_per_tid[thread], PERF_EVENT_IOC_RESET, 0);
-    ioctl(measure->fd_per_tid[thread], PERF_EVENT_IOC_ENABLE, -1);
     ioctl(measure->fd_per_tid[thread], PERF_EVENT_IOC_REFRESH, 1);
+    ioctl(measure->fd_per_tid[thread], PERF_EVENT_IOC_ENABLE, -1);
   }
  return 0;
 }
