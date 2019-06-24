@@ -443,13 +443,13 @@ int __numap_counting_start(struct numap_counting_measure *measure, struct perf_e
     fcntl(measure->fd_reads[node], F_SETSIG, SIGIO);
     fcntl(measure->fd_reads[node], F_SETOWN, getpid());
     ioctl(measure->fd_reads[node], PERF_EVENT_IOC_RESET, 0);
-    //ioctl(measure->fd_reads[node], PERF_EVENT_IOC_ENABLE, 0);
+    ioctl(measure->fd_reads[node], PERF_EVENT_IOC_ENABLE, 0);
     ioctl(measure->fd_reads[node], PERF_EVENT_IOC_REFRESH, 1);
     fcntl(measure->fd_writes[node], F_SETFL, O_NONBLOCK|O_ASYNC);
     fcntl(measure->fd_writes[node], F_SETSIG, SIGIO);
     fcntl(measure->fd_writes[node], F_SETOWN, getpid());
     ioctl(measure->fd_writes[node], PERF_EVENT_IOC_RESET, 0);
-    //ioctl(measure->fd_writes[node], PERF_EVENT_IOC_ENABLE, 0);
+    ioctl(measure->fd_writes[node], PERF_EVENT_IOC_ENABLE, 0);
     ioctl(measure->fd_writes[node], PERF_EVENT_IOC_REFRESH, 1);
   }
 
@@ -533,7 +533,7 @@ static int __numap_sampling_resume(struct numap_sampling_measure *measure) {
   int thread;
   for (thread = 0; thread < measure->nb_threads; thread++) {
     ioctl(measure->fd_per_tid[thread], PERF_EVENT_IOC_RESET, 0);
-    //ioctl(measure->fd_per_tid[thread], PERF_EVENT_IOC_ENABLE, -1);
+    ioctl(measure->fd_per_tid[thread], PERF_EVENT_IOC_ENABLE, -1);
     ioctl(measure->fd_per_tid[thread], PERF_EVENT_IOC_REFRESH, 1);
   }
  return 0;
