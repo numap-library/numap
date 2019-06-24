@@ -99,7 +99,8 @@ int main() {
   // Init read sampling
   struct numap_sampling_measure sm;
   int sampling_rate = 1000;
-  res = numap_sampling_init_measure(&sm, 2, sampling_rate, 64);
+  //res = numap_sampling_init_measure(&sm, 2, sampling_rate, 64);
+  res = numap_sampling_init_measure(&sm, 2, sampling_rate, 1);
   if(res < 0) {
     fprintf(stderr, "numap_sampling_init error : %s\n", numap_error_message(res));
     return -1;
