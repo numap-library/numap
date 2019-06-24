@@ -16,6 +16,7 @@
 #include <time.h>
 #include <numa.h>
 #include <linux/version.h>
+#include <signal.h>
 
 #include "numap.h"
 
@@ -396,6 +397,11 @@ int numap_counting_init_measure(struct numap_counting_measure *measure) {
   return 0;
 }
 
+static void perf_overflow_handler(int signum, siginfo_t *info, void* ucontext) {
+    fprintf(stdout, "[%d] signum : %d (POLL_IN : %d, POLL_HUP : %d\n", getpid(), signum, POLL_IN, POLL_HUP);
+    ioctl(info->si_fd, PERF_EVENT_IOC_REFRESH, 1);
+}
+
 int __numap_counting_start(struct numap_counting_measure *measure, struct perf_event_attr *pe_attr_read, struct perf_event_attr *pe_attr_write) {
 
   /**
@@ -419,12 +425,32 @@ int __numap_counting_start(struct numap_counting_measure *measure, struct perf_e
     }
   }
 
+  // Signal overflow
+  struct sigaction sigoverflow;
+  memset(&sigoverflow, 0, sizeof(struct sigaction));
+  sigoverflow.sa_sigaction = perf_overflow_handler;
+
+  if (sigaction(SIGIO, &sigoverflow, NULL) < 0)
+  {
+	  fprintf(stderr, "could not set up signal handler\n");
+	  perror("sigaction");
+	  exit(EXIT_FAILURE);
+  }
+
   // Starts measure
   for (int node = 0; node < measure->nb_nodes; node++) {
+    fcntl(measure->fd_reads[node], F_SETFL, O_NONBLOCK|O_ASYNC);
+    fcntl(measure->fd_reads[node], F_SETSIG, SIGIO);
+    fcntl(measure->fd_reads[node], F_SETOWN, getpid());
     ioctl(measure->fd_reads[node], PERF_EVENT_IOC_RESET, 0);
-    ioctl(measure->fd_reads[node], PERF_EVENT_IOC_ENABLE, 0);
+    //ioctl(measure->fd_reads[node], PERF_EVENT_IOC_ENABLE, 0);
+    ioctl(measure->fd_reads[node], PERF_EVENT_IOC_REFRESH, 1);
+    fcntl(measure->fd_writes[node], F_SETFL, O_NONBLOCK|O_ASYNC);
+    fcntl(measure->fd_writes[node], F_SETSIG, SIGIO);
+    fcntl(measure->fd_writes[node], F_SETOWN, getpid());
     ioctl(measure->fd_writes[node], PERF_EVENT_IOC_RESET, 0);
-    ioctl(measure->fd_writes[node], PERF_EVENT_IOC_ENABLE, 0);
+    //ioctl(measure->fd_writes[node], PERF_EVENT_IOC_ENABLE, 0);
+    ioctl(measure->fd_writes[node], PERF_EVENT_IOC_REFRESH, 1);
   }
 
   return 0;
@@ -507,7 +533,8 @@ static int __numap_sampling_resume(struct numap_sampling_measure *measure) {
   int thread;
   for (thread = 0; thread < measure->nb_threads; thread++) {
     ioctl(measure->fd_per_tid[thread], PERF_EVENT_IOC_RESET, 0);
-    ioctl(measure->fd_per_tid[thread], PERF_EVENT_IOC_ENABLE, 0);
+    //ioctl(measure->fd_per_tid[thread], PERF_EVENT_IOC_ENABLE, -1);
+    ioctl(measure->fd_per_tid[thread], PERF_EVENT_IOC_REFRESH, 1);
   }
  return 0;
 }
