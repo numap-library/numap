@@ -301,14 +301,14 @@ __attribute__((constructor)) void init(void) {
       numa_node_to_cpus(node, mask);
       numa_node_to_cpu[node] = -1;
       for (cpu = 0; cpu < nb_cpus; cpu++) {
-		if (*(mask->maskp) & (1 << cpu)) {
-		  numa_node_to_cpu[node] = cpu;
-		  break;
-		}
+        if (*(mask->maskp) & (1 << cpu)) {
+          numa_node_to_cpu[node] = cpu;
+          break;
+        }
       }
       numa_bitmask_free(mask);
       if (numa_node_to_cpu[node] == -1) {
-	nb_numa_nodes = -1; // to be handled properly
+    nb_numa_nodes = -1; // to be handled properly
       }
     }
   }
@@ -355,13 +355,13 @@ const char *numap_error_message(int error) {
     return "libnumap: start called again before stop";
   case ERROR_NUMAP_ARCH_NOT_SUPPORTED:
     return build_string("libnumap: architecture not supported: %s (family %d, model %d)",
-		  model_name, get_family(current_archi->id), get_model(current_archi->id));
+          model_name, get_family(current_archi->id), get_model(current_archi->id));
   case ERROR_NUMAP_READ_SAMPLING_ARCH_NOT_SUPPORTED:
     return build_string("libnumap: read sampling not supported on architecture: %s (family %d, model %d)",
-		  model_name, get_family(current_archi->id), get_model(current_archi->id));
+          model_name, get_family(current_archi->id), get_model(current_archi->id));
   case ERROR_NUMAP_WRITE_SAMPLING_ARCH_NOT_SUPPORTED:
     return build_string("libnumap: write sampling not supported on architecture: %s (family %d, model %d)",
-		  model_name, get_family(current_archi->id), get_model(current_archi->id));
+          model_name, get_family(current_archi->id), get_model(current_archi->id));
   case ERROR_PERF_EVENT_OPEN:
     return build_string("libnumap: error when calling perf_event_open: %s", strerror(errno));
   case ERROR_PFM:
@@ -398,7 +398,14 @@ int numap_counting_init_measure(struct numap_counting_measure *measure) {
 }
 
 static void perf_overflow_handler(int signum, siginfo_t *info, void* ucontext) {
-    fprintf(stdout, "\n--------------------------------------------------\n[%d] signum : %d, info->si_code : %d (POLL_IN : %d, POLL_HUP : %d\n", getpid(), signum, info->si_code, POLL_IN, POLL_HUP);
+    if (info->si_code != POLL_HUP)
+    {
+        // should not receive anything else than POLL_HUP
+        fprintf(stderr, "Received IO interruption (code %s) that is not POLL_HUP (code %d)\n", info->si_code, POLL_HUP);
+        exit(EXIT_FAILURE);
+    }
+    // buffer has overflown
+    fprintf(stdout, "[%d] POLL_HUP received from %d\n", getpid(), info->si_pid);
     ioctl(info->si_fd, PERF_EVENT_IOC_REFRESH, 1);
 }
 
@@ -433,9 +440,9 @@ int __numap_counting_start(struct numap_counting_measure *measure, struct perf_e
 
   if (sigaction(SIGIO, &sigoverflow, NULL) < 0)
   {
-	  fprintf(stderr, "could not set up signal handler\n");
-	  perror("sigaction");
-	  exit(EXIT_FAILURE);
+      fprintf(stderr, "could not set up signal handler\n");
+      perror("sigaction");
+      exit(EXIT_FAILURE);
   }
 
   // Starts measure
@@ -498,11 +505,11 @@ int numap_counting_stop(struct numap_counting_measure *measure) {
     ioctl(measure->fd_reads[node], PERF_EVENT_IOC_DISABLE, 0);
     ioctl(measure->fd_writes[node], PERF_EVENT_IOC_DISABLE, 0);
     if(read(measure->fd_reads[node], &measure->reads_count[node],
-	    sizeof(long long)) == -1) {
+        sizeof(long long)) == -1) {
       return ERROR_READ;
     }
     if (read(measure->fd_writes[node], &measure->writes_count[node],
-	     sizeof(long long)) == -1) {
+         sizeof(long long)) == -1) {
       return ERROR_READ;
     }
     close(measure->fd_reads[node]);
@@ -532,9 +539,9 @@ int numap_sampling_init_measure(struct numap_sampling_measure *measure, int nb_t
 
   if (sigaction(SIGIO, &sigoverflow, NULL) < 0)
   {
-	  fprintf(stderr, "could not set up signal handler\n");
-	  perror("sigaction");
-	  exit(EXIT_FAILURE);
+      fprintf(stderr, "could not set up signal handler\n");
+      perror("sigaction");
+      exit(EXIT_FAILURE);
   }
  
   return 0;
@@ -593,19 +600,19 @@ int __numap_sampling_start(struct numap_sampling_measure *measure, struct perf_e
     }
 
     measure->fd_per_tid[thread] = perf_event_open(pe_attr, measure->tids[thread], cpu,
-						  -1, 0);
+                          -1, 0);
     if (measure->fd_per_tid[thread] == -1) {
       return ERROR_PERF_EVENT_OPEN;
     }
     measure->metadata_pages_per_tid[thread] = mmap(NULL, measure->mmap_len, PROT_WRITE, MAP_SHARED, measure->fd_per_tid[thread], 0);
     if (measure->metadata_pages_per_tid[thread] == MAP_FAILED) {
       if (errno == EPERM) {
-	fprintf(stderr, "Permission error mapping pages.\n"
-		"Consider increasing /proc/sys/kernel/perf_event_mlock_kb,\n"
-		"(mmap length parameter = %zd > perf_event_mlock_kb = %u)\n", measure->mmap_len, (perf_event_mlock_kb * 1024));
+        fprintf(stderr, "Permission error mapping pages.\n"
+        "Consider increasing /proc/sys/kernel/perf_event_mlock_kb,\n"
+        "(mmap length parameter = %zd > perf_event_mlock_kb = %u)\n", measure->mmap_len, (perf_event_mlock_kb * 1024));
       } else {
-	fprintf (stderr, "Couldn't mmap file descriptor: %s - errno = %d\n",
-		 strerror (errno), errno);
+        fprintf (stderr, "Couldn't mmap file descriptor: %s - errno = %d\n",
+        strerror (errno), errno);
       }
       exit (EXIT_FAILURE);
     }
