@@ -406,7 +406,14 @@ static void perf_overflow_handler(int signum, siginfo_t *info, void* ucontext) {
     }
     // buffer has overflown
     fprintf(stdout, "[%d] POLL_HUP received from %d\n", getpid(), info->si_pid);
+    int fd = info->si_fd;
+    size_t measure_page_size = (size_t)sysconf(_SC_PAGESIZE);
+    size_t measure_mmap_len = measure_page_size + measure_page_size *64; 
+    struct perf_event_mmap_page *m = mmap(NULL, measure_mmap_len, PROT_WRITE, MAP_SHARED, fd, 0);
+    fprintf(stdout, "\nDEBUG :\n\tfd=%d\n\tm->data_head=%d\n\tm->data_tail=%d\n\tm->data_offset=%d\n\tm->data_size=%d\n", fd, m->data_head, m->data_tail, m->data_offset, m->data_size);
+
     ioctl(info->si_fd, PERF_EVENT_IOC_REFRESH, 1);
+    munmap(m, measure_mmap_len);
 }
 
 int __numap_counting_start(struct numap_counting_measure *measure, struct perf_event_attr *pe_attr_read, struct perf_event_attr *pe_attr_write) {
@@ -604,7 +611,9 @@ int __numap_sampling_start(struct numap_sampling_measure *measure, struct perf_e
     if (measure->fd_per_tid[thread] == -1) {
       return ERROR_PERF_EVENT_OPEN;
     }
+    fprintf(stdout, "\nDEBUG : fd=%d\n", measure->fd_per_tid[thread]);
     measure->metadata_pages_per_tid[thread] = mmap(NULL, measure->mmap_len, PROT_WRITE, MAP_SHARED, measure->fd_per_tid[thread], 0);
+    fprintf(stdout, "DEBUG : pointer to metadata=%p\n", measure->metadata_pages_per_tid[thread]);
     if (measure->metadata_pages_per_tid[thread] == MAP_FAILED) {
       if (errno == EPERM) {
         fprintf(stderr, "Permission error mapping pages.\n"
