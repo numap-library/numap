@@ -111,6 +111,7 @@ int main() {
   // Start memory read access sampling
   printf("\nStarting memory read sampling");
   fflush(stdout);
+  numap_sampling_set_mode_buffer_flush(&sm);
   res = numap_sampling_read_start(&sm);
   if(res < 0) {
     fprintf(stderr, " -> numap_sampling_start error : %s\n", numap_error_message(res));

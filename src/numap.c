@@ -405,13 +405,12 @@ static void perf_overflow_handler(int signum, siginfo_t *info, void* ucontext) {
         fprintf(stderr, "Received IO interruption (code %s) that is not POLL_HUP (code %d)\n", info->si_code, POLL_HUP);
         exit(EXIT_FAILURE);
     }
-    // buffer has overflown
-    fprintf(stdout, "[%d] POLL_HUP received from %d\n", getpid(), info->si_pid);
+    //fprintf(stdout, "[%d] POLL_HUP received from %d\n", getpid(), info->si_pid);
     int fd = info->si_fd;
     size_t measure_page_size = (size_t)sysconf(_SC_PAGESIZE);
     size_t measure_mmap_len = measure_page_size + measure_page_size *64; 
     struct perf_event_mmap_page *m = mmap(NULL, measure_mmap_len, PROT_WRITE, MAP_SHARED, fd, 0);
-    fprintf(stdout, "\nDEBUG :\n\tfd=%d\n\tm->data_head=%d\n\tm->data_tail=%d\n\tm->data_offset=%d\n\tm->data_size=%d\n", fd, m->data_head, m->data_tail, m->data_offset, m->data_size);
+    //fprintf(stdout, "\nDEBUG :\n\tfd=%d\n\tm->data_head=%d\n\tm->data_tail=%d\n\tm->data_offset=%d\n\tm->data_size=%d\n", fd, m->data_head, m->data_tail, m->data_offset, m->data_size);
 
     ioctl(info->si_fd, PERF_EVENT_IOC_REFRESH, 1);
     munmap(m, measure_mmap_len);
@@ -430,6 +429,7 @@ int set_signal_handler(void(*handler)(int, siginfo_t*,void*))
       perror("sigaction");
       exit(EXIT_FAILURE);
   }
+  return 0;
 }
 
 int numap_counting_set_mode_buffer_flush(struct numap_counting_measure *measure)
@@ -469,11 +469,14 @@ int numap_sampling_set_mode_buffer_flush(struct numap_sampling_measure *measure)
   // may be passed as function argument later
   set_signal_handler(perf_overflow_handler);
 
+  /*
+  int thread;
   for (thread = 0 ; thread < measure->nb_threads ; thread++) {
     fcntl(measure->fd_per_tid[thread], F_SETFL, O_NONBLOCK|O_ASYNC);
     fcntl(measure->fd_per_tid[thread], F_SETSIG, SIGIO);
     fcntl(measure->fd_per_tid[thread], F_SETOWN, getpid());
   }
+  */
   buffer_flush_enabled = 1;
   return 0;
 }
@@ -590,7 +593,12 @@ static int __numap_sampling_resume(struct numap_sampling_measure *measure) {
   for (thread = 0; thread < measure->nb_threads; thread++) {
     ioctl(measure->fd_per_tid[thread], PERF_EVENT_IOC_RESET, 0);
     if (buffer_flush_enabled != 0)
+    {
+	    fcntl(measure->fd_per_tid[thread], F_SETFL, O_NONBLOCK|O_ASYNC);
+	    fcntl(measure->fd_per_tid[thread], F_SETSIG, SIGIO);
+	    fcntl(measure->fd_per_tid[thread], F_SETOWN, getpid());
 	    ioctl(measure->fd_per_tid[thread], PERF_EVENT_IOC_REFRESH, 1);
+    }
     ioctl(measure->fd_per_tid[thread], PERF_EVENT_IOC_ENABLE, -1);
   }
  return 0;
