@@ -51,6 +51,7 @@ struct numap_sampling_measure {
   size_t mmap_len;
   char started;
   long fd_per_tid[MAX_NB_THREADS];
+  char buffer_flush_enabled;
 };
 
 /**
