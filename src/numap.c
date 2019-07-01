@@ -397,25 +397,54 @@ int numap_counting_init_measure(struct numap_counting_measure *measure) {
   return 0;
 }
 
+_Atomic int nb_interruptions;
+#define NB_REFRESH 1000
+
+struct mem_sampling_stat {
+  uint64_t head;
+  struct perf_event_header *header;
+  uint64_t consumed;
+};
+
 static void perf_overflow_handler(int signum, siginfo_t *info, void* ucontext) {
-    if (info->si_code != POLL_HUP)
-    {
-        // should not receive anything else than POLL_HUP
-        fprintf(stderr, "Received IO interruption (code %s) that is not POLL_HUP (code %d)\n", info->si_code, POLL_HUP);
-        printf("code=%s\n");
-        exit(EXIT_FAILURE);
-    }
-    //fprintf(stdout, "[%d] POLL_HUP received from %d\n", getpid(), info->si_pid);
-    /*
+  nb_interruptions++;
+  if (info->si_code == POLL_HUP) {
+    /* TODO: copy the samples */
     int fd = info->si_fd;
     size_t measure_page_size = (size_t)sysconf(_SC_PAGESIZE);
     size_t measure_mmap_len = measure_page_size + measure_page_size *64; 
-    struct perf_event_mmap_page *m = mmap(NULL, measure_mmap_len, PROT_WRITE, MAP_SHARED, fd, 0);
-    */
-    //fprintf(stdout, "\nDEBUG :\n\tfd=%d\n\tm->data_head=%d\n\tm->data_tail=%d\n\tm->data_offset=%d\n\tm->data_size=%d\n", fd, m->data_head, m->data_tail, m->data_offset, m->data_size);
+    struct perf_event_mmap_page *metadata_page = mmap(NULL, measure_mmap_len, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
 
-    ioctl(info->si_fd, PERF_EVENT_IOC_REFRESH, 1);
-    //munmap(m, measure_mmap_len);
+    struct mem_sampling_stat p_stat;
+
+    size_t sample_size = 0;
+    uint8_t* start_addr = (uint8_t *)metadata_page;
+
+    static size_t page_size = 0;
+    if(page_size == 0)
+      page_size = (size_t)sysconf(_SC_PAGESIZE);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
+    start_addr += metadata_page->data_offset;
+#else
+    start_addr += page_size;
+#endif
+
+    /* where the data begins */
+    p_stat.head = metadata_page -> data_head;
+    /* On SMP-capable platforms, after reading the data_head value,
+     * user space should issue an rmb().
+     */
+    rmb();
+    p_stat.header = (struct perf_event_header *)((char *)metadata_page + page_size);
+    sample_size =  p_stat.head - metadata_page->data_tail;
+    
+    fprintf(stderr, "%d : %d bytes (head : %d)\n", fd, sample_size, p_stat.head);
+
+    metadata_page->data_tail = p_stat.head;
+
+    ioctl(info->si_fd, PERF_EVENT_IOC_REFRESH, NB_REFRESH);
+    munmap(metadata_page, measure_mmap_len);
+  }
 }
 
 int set_signal_handler(void(*handler)(int, siginfo_t*,void*))
@@ -427,9 +456,9 @@ int set_signal_handler(void(*handler)(int, siginfo_t*,void*))
 
   if (sigaction(SIGIO, &sigoverflow, NULL) < 0)
   {
-      fprintf(stderr, "could not set up signal handler\n");
-      perror("sigaction");
-      exit(EXIT_FAILURE);
+    fprintf(stderr, "could not set up signal handler\n");
+    perror("sigaction");
+    exit(EXIT_FAILURE);
   }
   return 0;
 }
@@ -439,20 +468,13 @@ int numap_sampling_set_mode_buffer_flush(struct numap_sampling_measure *measure)
   // Has to be called before the mesure starts
   if (measure->started != 0)
   {
-	  return ERROR_NUMAP_ALREADY_STARTED;
+    return ERROR_NUMAP_ALREADY_STARTED;
   }
   // Set signal handler
-  // may be passed as function argument later
+  // may be given as function argument later
   set_signal_handler(perf_overflow_handler);
+  nb_interruptions = 0;
 
-  /*
-  int thread;
-  for (thread = 0 ; thread < measure->nb_threads ; thread++) {
-    fcntl(measure->fd_per_tid[thread], F_SETFL, O_NONBLOCK|O_ASYNC);
-    fcntl(measure->fd_per_tid[thread], F_SETSIG, SIGIO);
-    fcntl(measure->fd_per_tid[thread], F_SETOWN, measure->tids[thread]);
-  }
-  */
   measure->buffer_flush_enabled = 1;
   return 0;
 }
@@ -569,14 +591,14 @@ static int __numap_sampling_resume(struct numap_sampling_measure *measure) {
   int thread;
   for (thread = 0; thread < measure->nb_threads; thread++) {
     ioctl(measure->fd_per_tid[thread], PERF_EVENT_IOC_RESET, 0);
-    if (measure->buffer_flush_enabled != 0)
-    {
-        fcntl(measure->fd_per_tid[thread], F_SETFL, O_ASYNC);
-        fcntl(measure->fd_per_tid[thread], F_SETSIG, SIGIO);
-        fcntl(measure->fd_per_tid[thread], F_SETOWN, measure->tids[thread]);
-    	ioctl(measure->fd_per_tid[thread], PERF_EVENT_IOC_REFRESH, 1);
+    if (measure->buffer_flush_enabled != 0) {
+      fcntl(measure->fd_per_tid[thread], F_SETFL, O_ASYNC|O_NONBLOCK);
+      fcntl(measure->fd_per_tid[thread], F_SETSIG, SIGIO);
+      fcntl(measure->fd_per_tid[thread], F_SETOWN, measure->tids[thread]);
+      ioctl(measure->fd_per_tid[thread], PERF_EVENT_IOC_REFRESH, NB_REFRESH);
+    } else {
+      ioctl(measure->fd_per_tid[thread], PERF_EVENT_IOC_ENABLE, 0);
     }
-    ioctl(measure->fd_per_tid[thread], PERF_EVENT_IOC_ENABLE, 0);
   }
  return 0;
 }
@@ -624,9 +646,7 @@ int __numap_sampling_start(struct numap_sampling_measure *measure, struct perf_e
     if (measure->fd_per_tid[thread] == -1) {
       return ERROR_PERF_EVENT_OPEN;
     }
-    //fprintf(stdout, "\nDEBUG : fd=%d\n", measure->fd_per_tid[thread]);
     measure->metadata_pages_per_tid[thread] = mmap(NULL, measure->mmap_len, PROT_WRITE, MAP_SHARED, measure->fd_per_tid[thread], 0);
-    //fprintf(stdout, "\nDEBUG : pointer to metadata=%p\n", measure->metadata_pages_per_tid[thread]);
     if (measure->metadata_pages_per_tid[thread] == MAP_FAILED) {
       if (errno == EPERM) {
         fprintf(stderr, "Permission error mapping pages.\n"
