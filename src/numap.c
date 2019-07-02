@@ -417,7 +417,9 @@ void perf_overflow_handler(int signum, siginfo_t *info, void* ucontext) {
   nb_interruptions++;
   if (info->si_code == POLL_HUP) {
     /* TODO: copy the samples */
+
     int fd = info->si_fd;
+
     // search for corresponding measure
     struct link_fd_measure* current_lfm = lfm;
     while (current_lfm != NULL && current_lfm->fd != fd) {
@@ -429,7 +431,20 @@ void perf_overflow_handler(int signum, siginfo_t *info, void* ucontext) {
 	    exit(EXIT_FAILURE);
     }
     struct numap_sampling_measure* measure = current_lfm->measure;
-    struct perf_event_mmap_page *metadata_page = mmap(NULL, measure->mmap_len, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
+
+    // search metadata
+    int tid_i=-1; // search tid
+    for (int i = 0 ; i < measure->nb_threads ; i++)
+    {
+	    if (measure->fd_per_tid[i] == fd)
+		    tid_i = i;
+    }
+    if (tid_i == -1)
+    {
+	    fprintf(stderr, "No tid associated with fd %d\n", fd);
+	    exit(EXIT_FAILURE);
+    }
+    struct perf_event_mmap_page *metadata_page = measure->metadata_pages_per_tid[tid_i];
 
     struct mem_sampling_stat p_stat;
 
@@ -445,21 +460,36 @@ void perf_overflow_handler(int signum, siginfo_t *info, void* ucontext) {
     start_addr += page_size;
 #endif
 
+    // wrap data_head
+    if (metadata_page->data_head > metadata_page->data_size)
+    {
+      metadata_page->data_head = (metadata_page->data_head % metadata_page->data_size);
+    }
+
+
     /* where the data begins */
     p_stat.head = metadata_page -> data_head;
     /* On SMP-capable platforms, after reading the data_head value,
      * user space should issue an rmb().
      */
     rmb();
+
+    struct perf_event_header *header = (struct perf_event_header *)((char*)metadata_page + measure->page_size + metadata_page->data_tail);
+
     p_stat.header = (struct perf_event_header *)((char *)metadata_page + page_size);
     sample_size =  p_stat.head - metadata_page->data_tail;
     
-    fprintf(stderr, "%d : %d bytes (head : %d)\n", fd, sample_size, p_stat.head);
+    int data_total_size = metadata_page->data_size;
+    fprintf(stderr, "%d : (size : %d, tail : %d, head : %d, mmap_data_size : %d)\n", fd, sample_size, metadata_page->data_tail, p_stat.head, data_total_size);
+    if (metadata_page->data_tail >= data_total_size)
+    {
+	    fprintf(stderr, "STOOOOOP\n");
+    }
+
 
     metadata_page->data_tail = p_stat.head;
 
     ioctl(info->si_fd, PERF_EVENT_IOC_REFRESH, NB_REFRESH);
-    munmap(metadata_page, measure->mmap_len);
   }
 }
 
