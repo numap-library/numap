@@ -411,7 +411,15 @@ struct link_fd_measure {
 	struct numap_sampling_measure* measure;
 };
 
+struct mem_sampling_backed {
+	struct mem_sampling_backed* next;
+	int fd;		// corresponding fd
+	void* buffer;	// buffer where data is backed up
+	size_t buffer_size;
+};
+
 struct link_fd_measure *lfm;
+struct mem_sampling_backed *msb;
 
 void perf_overflow_handler(int signum, siginfo_t *info, void* ucontext) {
   nb_interruptions++;
@@ -446,48 +454,31 @@ void perf_overflow_handler(int signum, siginfo_t *info, void* ucontext) {
     }
     struct perf_event_mmap_page *metadata_page = measure->metadata_pages_per_tid[tid_i];
 
-    struct mem_sampling_stat p_stat;
-
-    size_t sample_size = 0;
-    uint8_t* start_addr = (uint8_t *)metadata_page;
-
-    static size_t page_size = 0;
-    if(page_size == 0)
-      page_size = (size_t)sysconf(_SC_PAGESIZE);
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
-    start_addr += metadata_page->data_offset;
-#else
-    start_addr += page_size;
-#endif
-
     // wrap data_head
     if (metadata_page->data_head > metadata_page->data_size)
     {
       metadata_page->data_head = (metadata_page->data_head % metadata_page->data_size);
     }
-
-
-    /* where the data begins */
-    p_stat.head = metadata_page -> data_head;
-    /* On SMP-capable platforms, after reading the data_head value,
-     * user space should issue an rmb().
-     */
+    uint64_t head = metadata_page->data_head;
     rmb();
-
-    struct perf_event_header *header = (struct perf_event_header *)((char*)metadata_page + measure->page_size + metadata_page->data_tail);
-
-    p_stat.header = (struct perf_event_header *)((char *)metadata_page + page_size);
-    sample_size =  p_stat.head - metadata_page->data_tail;
-    
-    int data_total_size = metadata_page->data_size;
-    fprintf(stderr, "%d : (size : %d, tail : %d, head : %d, mmap_data_size : %d)\n", fd, sample_size, metadata_page->data_tail, p_stat.head, data_total_size);
-    if (metadata_page->data_tail >= data_total_size)
-    {
-	    fprintf(stderr, "STOOOOOP\n");
+    uint64_t tail = metadata_page->data_tail;
+    size_t sample_size;
+    if (head < tail) {
+	    sample_size =  head - tail;
+    } else {
+	    sample_size = (metadata_page->data_size - tail) + head;
     }
-
-
-    metadata_page->data_tail = p_stat.head;
+    struct mem_sampling_backed *new_msb = malloc(sizeof(struct mem_sampling_backed));
+    new_msb->fd = fd;
+    new_msb->buffer_size = sample_size;
+    new_msb->buffer = malloc(sizeof(new_msb->buffer_size));
+    struct perf_event_header *header = (struct perf_event_header *)((char *)metadata_page + measure->page_size + tail);
+    void* start_address = (char*)metadata_page+measure->page_size+tail;
+    //memcpy(new_msb->buffer, start_address, new_msb->buffer_size);
+    new_msb->next = msb;
+    msb = new_msb;
+    
+    metadata_page->data_tail = head;
 
     ioctl(info->si_fd, PERF_EVENT_IOC_REFRESH, NB_REFRESH);
   }
@@ -628,6 +619,7 @@ int numap_sampling_init_measure(struct numap_sampling_measure *measure, int nb_t
     measure->metadata_pages_per_tid[thread] = 0;
   }
   lfm = NULL;
+  msb = NULL;
   measure->buffer_flush_enabled = 0;
  
   return 0;
