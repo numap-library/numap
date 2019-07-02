@@ -1,6 +1,7 @@
 #include <inttypes.h>
 #include <sys/types.h>
 #include <perfmon/pfmlib_perf_event.h>
+#include <signal.h>
 
 #define MAX_NB_NUMA_NODES     16
 #define MAX_NB_THREADS        24
@@ -95,7 +96,8 @@ int numap_counting_stop(struct numap_counting_measure *measure);
 /**
  * Memory read and write sampling.
  */
-int numap_sampling_set_mode_buffer_flush(struct numap_sampling_measure *measure);
+void perf_overflow_handler(int, siginfo_t*, void*);
+int numap_sampling_set_mode_buffer_flush(struct numap_sampling_measure *measure, void(*)(int,siginfo_t*,void*));
 int numap_sampling_init_measure(struct numap_sampling_measure *measure, int nb_threads, int sampling_rate, int mmap_pages_count);
 int numap_sampling_read_start_generic(struct numap_sampling_measure *measure, uint64_t sample_type);
 int numap_sampling_read_start(struct numap_sampling_measure *measure);

@@ -112,7 +112,7 @@ int main() {
   printf("\nStarting memory read sampling");
   fflush(stdout);
   // has to be called after tids set and before start
-  if (numap_sampling_set_mode_buffer_flush(&sm) != 0)
+  if (numap_sampling_set_mode_buffer_flush(&sm, perf_overflow_handler) != 0)
   {
     fprintf(stderr, "numap_sampling_set_mode_buffer_flush error : %s\n", numap_error_message(res));
     return -1;
@@ -165,7 +165,7 @@ int main() {
   // Start memory write access sampling
   printf("\nStarting memory write sampling");
   fflush(stdout);
-  if (numap_sampling_set_mode_buffer_flush(&sm) != 0)
+  if (numap_sampling_set_mode_buffer_flush(&sm, perf_overflow_handler) != 0)
   {
     fprintf(stderr, "numap_sampling_set_mode_buffer_flush error : %s\n", numap_error_message(res));
     return -1;

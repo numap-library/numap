@@ -16,7 +16,6 @@
 #include <time.h>
 #include <numa.h>
 #include <linux/version.h>
-#include <signal.h>
 
 #include "numap.h"
 
@@ -414,7 +413,7 @@ struct link_fd_measure {
 
 struct link_fd_measure *lfm;
 
-static void perf_overflow_handler(int signum, siginfo_t *info, void* ucontext) {
+void perf_overflow_handler(int signum, siginfo_t *info, void* ucontext) {
   nb_interruptions++;
   if (info->si_code == POLL_HUP) {
     /* TODO: copy the samples */
@@ -480,7 +479,7 @@ int set_signal_handler(void(*handler)(int, siginfo_t*,void*))
   return 0;
 }
 
-int numap_sampling_set_mode_buffer_flush(struct numap_sampling_measure *measure)
+int numap_sampling_set_mode_buffer_flush(struct numap_sampling_measure *measure, void(*handler)(int,siginfo_t*,void*))
 {
   // Has to be called before the mesure starts
   if (measure->started != 0)
@@ -489,7 +488,7 @@ int numap_sampling_set_mode_buffer_flush(struct numap_sampling_measure *measure)
   }
   // Set signal handler
   // may be given as function argument later
-  set_signal_handler(perf_overflow_handler);
+  set_signal_handler(handler);
   nb_interruptions = 0;
 
   measure->buffer_flush_enabled = 1;
