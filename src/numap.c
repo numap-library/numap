@@ -511,6 +511,18 @@ void perf_overflow_handler(int signum, siginfo_t *info, void* ucontext) {
   }
 }
 
+void free_mem_sampling_backed(struct mem_sampling_backed* to_clean)
+{
+	struct mem_sampling_backed* current = NULL;
+	while (to_clean != NULL)
+	{
+		current = to_clean;
+		to_clean = to_clean->next;
+		free(current->buffer);
+		free(current);
+	}
+}
+
 int set_signal_handler(void(*handler)(int, siginfo_t*,void*))
 {
   struct sigaction sigoverflow;
@@ -872,6 +884,6 @@ int numap_sampling_end(struct numap_sampling_measure *measure) {
     munmap(measure->metadata_pages_per_tid[thread], measure->mmap_len);
     close(measure->fd_per_tid[thread]);
   }
-
+  free_mem_sampling_backed(msb);
   return 0;
 }
