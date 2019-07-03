@@ -16,6 +16,7 @@
 #include <time.h>
 #include <numa.h>
 #include <linux/version.h>
+#include <pthread.h>
 
 #include "numap.h"
 
@@ -417,6 +418,7 @@ struct mem_sampling_backed {
 	void* buffer;	// buffer where data is backed up
 	size_t buffer_size;
 };
+pthread_mutex_t msb_lock = PTHREAD_MUTEX_INITIALIZER;
 
 struct link_fd_measure *lfm;
 struct mem_sampling_backed *msb;
@@ -469,14 +471,39 @@ void perf_overflow_handler(int signum, siginfo_t *info, void* ucontext) {
 	    sample_size = (metadata_page->data_size - tail) + head;
     }
     struct mem_sampling_backed *new_msb = malloc(sizeof(struct mem_sampling_backed));
+    if (new_msb == NULL) {
+	    fprintf(stderr, "could not malloc mem_sampling_backed\n");
+	    exit(EXIT_FAILURE);
+    }
     new_msb->fd = fd;
     new_msb->buffer_size = sample_size;
-    new_msb->buffer = malloc(sizeof(new_msb->buffer_size));
-    struct perf_event_header *header = (struct perf_event_header *)((char *)metadata_page + measure->page_size + tail);
-    void* start_address = (char*)metadata_page+measure->page_size+tail;
-    //memcpy(new_msb->buffer, start_address, new_msb->buffer_size);
+    new_msb->buffer = malloc(new_msb->buffer_size);
+    if (new_msb->buffer == NULL) {
+	    fprintf(stderr, "could not malloc buffer\n");
+	    exit(EXIT_FAILURE);
+    }
+    // TODO : Save the data here
+    //struct perf_event_header *header = (struct perf_event_header *)((char *)metadata_page + measure->page_size + tail);
+    uint8_t* start_addr = (uint8_t *)metadata_page;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
+    start_addr += metadata_page->data_offset;
+#else
+    static size_t page_size = 0;
+    if(page_size == 0)
+      page_size = (size_t)sysconf(_SC_PAGESIZE);
+    start_addr += page_size;
+#endif
+    //void* start_address = (char*)metadata_page+measure->page_size+tail;
+    if (tail > head) {
+      memcpy(new_msb->buffer, start_addr+tail, new_msb->buffer_size);
+    } else {
+      memcpy(new_msb->buffer, start_addr+tail, (metadata_page->data_size - tail));
+      memcpy(new_msb->buffer, start_addr, head);
+    }
+    pthread_mutex_lock(&msb_lock);
     new_msb->next = msb;
     msb = new_msb;
+    pthread_mutex_unlock(&msb_lock);
     
     metadata_page->data_tail = head;
 
