@@ -55,6 +55,19 @@ struct numap_sampling_measure {
   char buffer_flush_enabled;
 };
 
+struct link_fd_measure {
+	struct link_fd_measure *next;
+	int fd;
+	struct numap_sampling_measure* measure;
+};
+
+struct mem_sampling_backed {
+	struct mem_sampling_backed* next;
+	int fd;		// corresponding fd
+	void* buffer;	// buffer where data is backed up
+	size_t buffer_size;
+};
+
 /**
  * Structure representing a read sample gathered with the library in
  * sampling mode.
@@ -98,6 +111,8 @@ int numap_counting_stop(struct numap_counting_measure *measure);
  */
 void perf_overflow_handler(int, siginfo_t*, void*);
 int numap_sampling_set_mode_buffer_flush(struct numap_sampling_measure *measure, void(*)(int,siginfo_t*,void*));
+void temp_debug_print(struct numap_sampling_measure*, char);
+int numap_sampling_print_backed(struct numap_sampling_measure *, struct mem_sampling_backed *, char);
 int numap_sampling_init_measure(struct numap_sampling_measure *measure, int nb_threads, int sampling_rate, int mmap_pages_count);
 int numap_sampling_read_start_generic(struct numap_sampling_measure *measure, uint64_t sample_type);
 int numap_sampling_read_start(struct numap_sampling_measure *measure);
