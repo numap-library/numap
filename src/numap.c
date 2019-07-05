@@ -406,10 +406,13 @@ struct mem_sampling_stat {
   uint64_t consumed;
 };
 
-pthread_mutex_t msb_lock = PTHREAD_MUTEX_INITIALIZER;
+struct link_fd_measure {
+  struct link_fd_measure *next;
+  int fd;
+  struct numap_sampling_measure* measure;
+};
 
 struct link_fd_measure *lfm;
-struct mem_sampling_backed *msb;
 
 void perf_overflow_handler(int signum, siginfo_t *info, void* ucontext) {
   nb_interruptions++;
@@ -421,96 +424,23 @@ void perf_overflow_handler(int signum, siginfo_t *info, void* ucontext) {
     // search for corresponding measure
     struct link_fd_measure* current_lfm = lfm;
     while (current_lfm != NULL && current_lfm->fd != fd) {
-	    current_lfm = current_lfm->next;
+      current_lfm = current_lfm->next;
     }
     if (current_lfm == NULL)
     {
-	    fprintf(stderr, "No measure associated with fd %d\n", fd);
-	    exit(EXIT_FAILURE);
+      fprintf(stderr, "No measure associated with fd %d\n", fd);
+      exit(EXIT_FAILURE);
     }
     struct numap_sampling_measure* measure = current_lfm->measure;
 
-    // search metadata
-    int tid_i=-1; // search tid
-    for (int i = 0 ; i < measure->nb_threads ; i++)
-    {
-	    if (measure->fd_per_tid[i] == fd)
-		    tid_i = i;
-    }
-    if (tid_i == -1)
-    {
-	    fprintf(stderr, "No tid associated with fd %d\n", fd);
-	    exit(EXIT_FAILURE);
-    }
-    struct perf_event_mmap_page *metadata_page = measure->metadata_pages_per_tid[tid_i];
-
-    // wrap data_head
-    if (metadata_page->data_head > metadata_page->data_size)
-    {
-      metadata_page->data_head = (metadata_page->data_head % metadata_page->data_size);
-    }
-    uint64_t head = metadata_page->data_head;
-    rmb();
-    uint64_t tail = metadata_page->data_tail;
-    size_t sample_size;
-    if (head > tail) {
-	    sample_size =  head - tail;
+    if (measure->handler) {
+      measure->handler(measure, fd);
     } else {
-	    sample_size = (metadata_page->data_size - tail) + head;
+      measure->missed += measure->nb_refresh;
     }
-    struct mem_sampling_backed *new_msb = malloc(sizeof(struct mem_sampling_backed));
-    if (new_msb == NULL) {
-	    fprintf(stderr, "could not malloc mem_sampling_backed\n");
-	    fprintf(stderr, "%s - errno %d\n", strerror(errno), errno);
-	    exit(EXIT_FAILURE);
-    }
-    new_msb->fd = fd;
-    new_msb->buffer_size = sample_size;
-    new_msb->buffer = malloc(new_msb->buffer_size);
-    if (new_msb->buffer == NULL) {
-	    fprintf(stderr, "could not malloc buffer\n");
-	    fprintf(stderr, "%s - errno %d\n", strerror(errno), errno);
-	    exit(EXIT_FAILURE);
-    }
-    // TODO : Save the data here
-    //struct perf_event_header *header = (struct perf_event_header *)((char *)metadata_page + measure->page_size + tail);
-    uint8_t* start_addr = (uint8_t *)metadata_page;
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
-    start_addr += metadata_page->data_offset;
-#else
-    static size_t page_size = 0;
-    if(page_size == 0)
-      page_size = (size_t)sysconf(_SC_PAGESIZE);
-    start_addr += page_size;
-#endif
-    //void* start_address = (char*)metadata_page+measure->page_size+tail;
-    if (head > tail) {
-      memcpy(new_msb->buffer, start_addr+tail, new_msb->buffer_size);
-    } else {
-      memcpy(new_msb->buffer, start_addr+tail, (metadata_page->data_size - tail));
-      memcpy((char*)new_msb->buffer + (metadata_page->data_size - tail), start_addr, head);
-    }
-    pthread_mutex_lock(&msb_lock);
-    new_msb->next = msb;
-    msb = new_msb;
-    pthread_mutex_unlock(&msb_lock);
-    
-    metadata_page->data_tail = head;
 
     ioctl(info->si_fd, PERF_EVENT_IOC_REFRESH, NB_REFRESH);
   }
-}
-
-void free_mem_sampling_backed(struct mem_sampling_backed* to_clean)
-{
-	struct mem_sampling_backed* current = NULL;
-	while (to_clean != NULL)
-	{
-		current = to_clean;
-		to_clean = to_clean->next;
-		free(current->buffer);
-		free(current);
-	}
 }
 
 int set_signal_handler(void(*handler)(int, siginfo_t*,void*))
@@ -529,7 +459,7 @@ int set_signal_handler(void(*handler)(int, siginfo_t*,void*))
   return 0;
 }
 
-int numap_sampling_set_mode_buffer_flush(struct numap_sampling_measure *measure, void(*handler)(int,siginfo_t*,void*))
+int numap_sampling_set_mode_buffer_flush(struct numap_sampling_measure *measure, void(*handler)(struct numap_sampling_measure*,int))
 {
   // Has to be called before the mesure starts
   if (measure->started != 0)
@@ -538,16 +468,11 @@ int numap_sampling_set_mode_buffer_flush(struct numap_sampling_measure *measure,
   }
   // Set signal handler
   // may be given as function argument later
-  set_signal_handler(handler);
-  nb_interruptions = 0;
+  measure->handler = handler;
+  set_signal_handler(perf_overflow_handler);
 
   measure->buffer_flush_enabled = 1;
   return 0;
-}
-
-void temp_debug_print(struct numap_sampling_measure* m, char print_samples) {
-	numap_sampling_print_backed(m, msb, print_samples);
-	free_mem_sampling_backed(msb);
 }
 
 int __numap_counting_start(struct numap_counting_measure *measure, struct perf_event_attr *pe_attr_read, struct perf_event_attr *pe_attr_write) {
@@ -653,8 +578,8 @@ int numap_sampling_init_measure(struct numap_sampling_measure *measure, int nb_t
     measure->metadata_pages_per_tid[thread] = 0;
   }
   lfm = NULL;
-  msb = NULL;
   measure->buffer_flush_enabled = 0;
+  measure->missed = 0;
  
   return 0;
 }
@@ -812,9 +737,9 @@ int numap_sampling_read_stop(struct numap_sampling_measure *measure) {
   }
   struct link_fd_measure* current_lfm;
   while (lfm != NULL) {
-	  current_lfm = lfm;
-	  lfm = lfm->next;
-	  free(current_lfm);
+    current_lfm = lfm;
+    lfm = lfm->next;
+    free(current_lfm);
   }
 
   return 0;
@@ -879,6 +804,5 @@ int numap_sampling_end(struct numap_sampling_measure *measure) {
     munmap(measure->metadata_pages_per_tid[thread], measure->mmap_len);
     close(measure->fd_per_tid[thread]);
   }
-  free_mem_sampling_backed(msb);
   return 0;
 }
