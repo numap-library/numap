@@ -397,9 +397,6 @@ int numap_counting_init_measure(struct numap_counting_measure *measure) {
   return 0;
 }
 
-_Atomic int nb_interruptions;
-#define NB_REFRESH 1000
-
 struct mem_sampling_stat {
   uint64_t head;
   struct perf_event_header *header;
@@ -415,7 +412,6 @@ struct link_fd_measure {
 struct link_fd_measure *lfm;
 
 void perf_overflow_handler(int signum, siginfo_t *info, void* ucontext) {
-  nb_interruptions++;
   if (info->si_code == POLL_HUP) {
     /* TODO: copy the samples */
 
@@ -439,7 +435,7 @@ void perf_overflow_handler(int signum, siginfo_t *info, void* ucontext) {
       measure->missed += measure->nb_refresh;
     }
 
-    ioctl(info->si_fd, PERF_EVENT_IOC_REFRESH, NB_REFRESH);
+    ioctl(info->si_fd, PERF_EVENT_IOC_REFRESH, measure->nb_refresh);
   }
 }
 
@@ -459,7 +455,7 @@ int set_signal_handler(void(*handler)(int, siginfo_t*,void*))
   return 0;
 }
 
-int numap_sampling_set_mode_buffer_flush(struct numap_sampling_measure *measure, void(*handler)(struct numap_sampling_measure*,int))
+int numap_sampling_set_mode_buffer_flush(struct numap_sampling_measure *measure, void(*handler)(struct numap_sampling_measure*,int), int nb_refresh)
 {
   // Has to be called before the mesure starts
   if (measure->started != 0)
@@ -470,6 +466,7 @@ int numap_sampling_set_mode_buffer_flush(struct numap_sampling_measure *measure,
   // may be given as function argument later
   measure->handler = handler;
   set_signal_handler(perf_overflow_handler);
+  measure->nb_refresh = nb_refresh;
 
   measure->buffer_flush_enabled = 1;
   return 0;
@@ -579,6 +576,7 @@ int numap_sampling_init_measure(struct numap_sampling_measure *measure, int nb_t
   }
   lfm = NULL;
   measure->buffer_flush_enabled = 0;
+  measure->handler = NULL;
   measure->missed = 0;
  
   return 0;
@@ -589,14 +587,11 @@ static int __numap_sampling_resume(struct numap_sampling_measure *measure) {
   int thread;
   for (thread = 0; thread < measure->nb_threads; thread++) {
     ioctl(measure->fd_per_tid[thread], PERF_EVENT_IOC_RESET, 0);
-    if (measure->buffer_flush_enabled != 0) {
-      fcntl(measure->fd_per_tid[thread], F_SETFL, O_ASYNC|O_NONBLOCK);
-      fcntl(measure->fd_per_tid[thread], F_SETSIG, SIGIO);
-      fcntl(measure->fd_per_tid[thread], F_SETOWN, measure->tids[thread]);
-      ioctl(measure->fd_per_tid[thread], PERF_EVENT_IOC_REFRESH, NB_REFRESH);
-    } else {
-      ioctl(measure->fd_per_tid[thread], PERF_EVENT_IOC_ENABLE, 0);
-    }
+    fcntl(measure->fd_per_tid[thread], F_SETFL, O_ASYNC|O_NONBLOCK);
+    fcntl(measure->fd_per_tid[thread], F_SETSIG, SIGIO);
+    fcntl(measure->fd_per_tid[thread], F_SETOWN, measure->tids[thread]);
+    ioctl(measure->fd_per_tid[thread], PERF_EVENT_IOC_REFRESH, measure->nb_refresh);
+    ioctl(measure->fd_per_tid[thread], PERF_EVENT_IOC_ENABLE, 0);
   }
  return 0;
 }
