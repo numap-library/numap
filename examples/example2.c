@@ -280,7 +280,7 @@ int main() {
   sm.tids[1] = tid_1;
 
   // set data backup
-  if (numap_sampling_set_mode_buffer_flush(&sm, handler) != 0)
+  if (numap_sampling_set_mode_buffer_flush(&sm, handler, 1000) != 0)
   {
     fprintf(stderr, "numap_sampling_set_mode_buffer_flush error : %s\n", numap_error_message(res));
     return -1;
@@ -341,7 +341,7 @@ int main() {
   // Start memory write access sampling
   printf("\nStarting memory write sampling");
   fflush(stdout);
-  if (numap_sampling_set_mode_buffer_flush(&sm, handler) != 0)
+  if (numap_sampling_set_mode_buffer_flush(&sm, handler, 1000) != 0)
   {
     fprintf(stderr, "numap_sampling_set_mode_buffer_flush error : %s\n", numap_error_message(res));
     return -1;

@@ -53,9 +53,8 @@ struct numap_sampling_measure {
   char started;
   long fd_per_tid[MAX_NB_THREADS];
   // overflow related fields
-  char buffer_flush_enabled;
   void (*handler)(struct numap_sampling_measure*, int);
-  int missed;
+  int total_samples;
   int nb_refresh;
 };
 

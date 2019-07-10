@@ -373,6 +373,21 @@ const char *numap_error_message(int error) {
   }
 }
 
+int set_signal_handler(void(*handler)(int, siginfo_t*,void*)) {
+  struct sigaction sigoverflow;
+  memset(&sigoverflow, 0, sizeof(struct sigaction));
+  sigoverflow.sa_sigaction = handler;
+  sigoverflow.sa_flags = SA_SIGINFO;
+
+  if (sigaction(SIGIO, &sigoverflow, NULL) < 0)
+  {
+    fprintf(stderr, "could not set up signal handler\n");
+    perror("sigaction");
+    exit(EXIT_FAILURE);
+  }
+  return 0;
+}
+
 int numap_init(void) {
 
   if (nb_numa_nodes == -1) {
@@ -387,6 +402,7 @@ int numap_init(void) {
   if (curr_err != PFM_SUCCESS) {
     return ERROR_PFM;
   }
+  set_signal_handler(perf_overflow_handler);
   return 0;
 }
 
@@ -396,12 +412,6 @@ int numap_counting_init_measure(struct numap_counting_measure *measure) {
   measure->started = 0;
   return 0;
 }
-
-struct mem_sampling_stat {
-  uint64_t head;
-  struct perf_event_header *header;
-  uint64_t consumed;
-};
 
 struct link_fd_measure {
   struct link_fd_measure *next;
@@ -431,28 +441,11 @@ void perf_overflow_handler(int signum, siginfo_t *info, void* ucontext) {
 
     if (measure->handler) {
       measure->handler(measure, fd);
-    } else {
-      measure->missed += measure->nb_refresh;
     }
+    measure->total_samples += measure->nb_refresh;
 
     ioctl(info->si_fd, PERF_EVENT_IOC_REFRESH, measure->nb_refresh);
   }
-}
-
-int set_signal_handler(void(*handler)(int, siginfo_t*,void*))
-{
-  struct sigaction sigoverflow;
-  memset(&sigoverflow, 0, sizeof(struct sigaction));
-  sigoverflow.sa_sigaction = handler;
-  sigoverflow.sa_flags = SA_SIGINFO;
-
-  if (sigaction(SIGIO, &sigoverflow, NULL) < 0)
-  {
-    fprintf(stderr, "could not set up signal handler\n");
-    perror("sigaction");
-    exit(EXIT_FAILURE);
-  }
-  return 0;
 }
 
 int numap_sampling_set_mode_buffer_flush(struct numap_sampling_measure *measure, void(*handler)(struct numap_sampling_measure*,int), int nb_refresh)
@@ -465,10 +458,13 @@ int numap_sampling_set_mode_buffer_flush(struct numap_sampling_measure *measure,
   // Set signal handler
   // may be given as function argument later
   measure->handler = handler;
-  set_signal_handler(perf_overflow_handler);
+  if (nb_refresh <= 0)
+  {
+	  fprintf(stderr, "Undefined behaviour : nb_refresh %d <= 0\n", nb_refresh);
+	  exit(EXIT_FAILURE);
+  }
   measure->nb_refresh = nb_refresh;
 
-  measure->buffer_flush_enabled = 1;
   return 0;
 }
 
@@ -575,9 +571,9 @@ int numap_sampling_init_measure(struct numap_sampling_measure *measure, int nb_t
     measure->metadata_pages_per_tid[thread] = 0;
   }
   lfm = NULL;
-  measure->buffer_flush_enabled = 0;
   measure->handler = NULL;
-  measure->missed = 0;
+  measure->total_samples = 0;
+  measure->nb_refresh = 1000; // default refresh 
  
   return 0;
 }
