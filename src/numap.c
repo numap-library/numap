@@ -402,7 +402,6 @@ int numap_init(void) {
   if (curr_err != PFM_SUCCESS) {
     return ERROR_PFM;
   }
-  set_signal_handler(perf_overflow_handler);
   return 0;
 }
 
@@ -419,16 +418,16 @@ struct link_fd_measure {
   struct numap_sampling_measure* measure;
 };
 
-struct link_fd_measure *lfm;
+struct link_fd_measure *link_fd_measure;
 
-void perf_overflow_handler(int signum, siginfo_t *info, void* ucontext) {
+void refresh_wrapper_handler(int signum, siginfo_t *info, void* ucontext) {
   if (info->si_code == POLL_HUP) {
     /* TODO: copy the samples */
 
     int fd = info->si_fd;
 
     // search for corresponding measure
-    struct link_fd_measure* current_lfm = lfm;
+    struct link_fd_measure* current_lfm = link_fd_measure;
     while (current_lfm != NULL && current_lfm->fd != fd) {
       current_lfm = current_lfm->next;
     }
@@ -448,7 +447,7 @@ void perf_overflow_handler(int signum, siginfo_t *info, void* ucontext) {
   }
 }
 
-int numap_sampling_set_mode_buffer_flush(struct numap_sampling_measure *measure, void(*handler)(struct numap_sampling_measure*,int), int nb_refresh)
+int numap_sampling_set_measure_handler(struct numap_sampling_measure *measure, void(*handler)(struct numap_sampling_measure*,int), int nb_refresh)
 {
   // Has to be called before the mesure starts
   if (measure->started != 0)
@@ -570,9 +569,10 @@ int numap_sampling_init_measure(struct numap_sampling_measure *measure, int nb_t
     measure->fd_per_tid[thread] = 0;
     measure->metadata_pages_per_tid[thread] = 0;
   }
-  lfm = NULL;
+  link_fd_measure = NULL;
   measure->handler = NULL;
   measure->total_samples = 0;
+  set_signal_handler(refresh_wrapper_handler);
   measure->nb_refresh = 1000; // default refresh 
  
   return 0;
@@ -648,10 +648,10 @@ int __numap_sampling_start(struct numap_sampling_measure *measure, struct perf_e
       exit (EXIT_FAILURE);
     }
     struct link_fd_measure* new_lfm = malloc(sizeof(struct link_fd_measure));
-    new_lfm->next = lfm;
+    new_lfm->next = link_fd_measure;
     new_lfm->fd = measure->fd_per_tid[thread];
     new_lfm->measure = measure;
-    lfm = new_lfm;
+    link_fd_measure = new_lfm;
   }
   __numap_sampling_resume(measure);
   
@@ -727,9 +727,9 @@ int numap_sampling_read_stop(struct numap_sampling_measure *measure) {
     ioctl(measure->fd_per_tid[thread], PERF_EVENT_IOC_DISABLE, 0);
   }
   struct link_fd_measure* current_lfm;
-  while (lfm != NULL) {
-    current_lfm = lfm;
-    lfm = lfm->next;
+  while (link_fd_measure != NULL) {
+    current_lfm = link_fd_measure;
+    link_fd_measure = link_fd_measure->next;
     free(current_lfm);
   }
 
