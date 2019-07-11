@@ -271,7 +271,11 @@ int numap_sampling_print(struct numap_sampling_measure *measure, char print_samp
     printf("Thread %d: %-8d %-30s %0.3f%%\n", thread, remote_cache_count, "remote cache or local memory", (100.0 * remote_cache_count / total_count));
     printf("Thread %d: %-8d %-30s %0.3f%%\n", thread, remote_memory_count, "remote memory", (100.0 * remote_memory_count / total_count));
     printf("Thread %d: %-8d %-30s %0.3f%%\n", thread, na_miss_count, "unknown l3 miss", (100.0 * na_miss_count / total_count));
+    if (measure->nb_refresh > 0) {
+	    measure->total_samples += (total_count % measure->nb_refresh);
+    }
   }
+  printf("\nTotal sample number : %d\n", measure->total_samples);
 
   return 0;
 }

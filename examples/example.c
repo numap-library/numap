@@ -111,6 +111,7 @@ int main() {
   // Start memory read access sampling
   printf("\nStarting memory read sampling");
   fflush(stdout);
+  // has to be called after tids set and before start
   res = numap_sampling_read_start(&sm);
   if(res < 0) {
     fprintf(stderr, " -> numap_sampling_start error : %s\n", numap_error_message(res));
