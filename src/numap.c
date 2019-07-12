@@ -249,6 +249,15 @@ struct archi *current_archi;
 char *model_name = NULL;
 int curr_err;
 
+struct link_fd_measure {
+  struct link_fd_measure *next;
+  int fd;
+  struct numap_sampling_measure* measure;
+};
+
+struct link_fd_measure *link_fd_measure = NULL;
+pthread_mutex_t link_fd_lock;
+
 /**
  * Special function called each time a process using the lib is
  * started.
@@ -402,6 +411,10 @@ int numap_init(void) {
   if (curr_err != PFM_SUCCESS) {
     return ERROR_PFM;
   }
+
+  link_fd_measure = NULL;
+  pthread_mutex_init(&link_fd_lock, NULL);
+
   return 0;
 }
 
@@ -411,14 +424,6 @@ int numap_counting_init_measure(struct numap_counting_measure *measure) {
   measure->started = 0;
   return 0;
 }
-
-struct link_fd_measure {
-  struct link_fd_measure *next;
-  int fd;
-  struct numap_sampling_measure* measure;
-};
-
-struct link_fd_measure *link_fd_measure;
 
 void refresh_wrapper_handler(int signum, siginfo_t *info, void* ucontext) {
   if (info->si_code == POLL_HUP) {
@@ -434,6 +439,7 @@ void refresh_wrapper_handler(int signum, siginfo_t *info, void* ucontext) {
     if (current_lfm == NULL)
     {
       fprintf(stderr, "No measure associated with fd %d\n", fd);
+      abort();
       exit(EXIT_FAILURE);
     }
     struct numap_sampling_measure* measure = current_lfm->measure;
@@ -569,7 +575,6 @@ int numap_sampling_init_measure(struct numap_sampling_measure *measure, int nb_t
     measure->fd_per_tid[thread] = 0;
     measure->metadata_pages_per_tid[thread] = 0;
   }
-  link_fd_measure = NULL;
   measure->handler = NULL;
   measure->total_samples = 0;
   set_signal_handler(refresh_wrapper_handler);
@@ -648,10 +653,13 @@ int __numap_sampling_start(struct numap_sampling_measure *measure, struct perf_e
       exit (EXIT_FAILURE);
     }
     struct link_fd_measure* new_lfm = malloc(sizeof(struct link_fd_measure));
-    new_lfm->next = link_fd_measure;
     new_lfm->fd = measure->fd_per_tid[thread];
     new_lfm->measure = measure;
+
+    pthread_mutex_lock(&link_fd_lock);
+    new_lfm->next = link_fd_measure;
     link_fd_measure = new_lfm;
+    pthread_mutex_unlock(&link_fd_lock);
   }
   __numap_sampling_resume(measure);
   
@@ -726,13 +734,6 @@ int numap_sampling_read_stop(struct numap_sampling_measure *measure) {
   for (thread = 0; thread < measure->nb_threads; thread++) {
     ioctl(measure->fd_per_tid[thread], PERF_EVENT_IOC_DISABLE, 0);
   }
-  struct link_fd_measure* current_lfm;
-  while (link_fd_measure != NULL) {
-    current_lfm = link_fd_measure;
-    link_fd_measure = link_fd_measure->next;
-    free(current_lfm);
-  }
-
   return 0;
 }
 
@@ -791,6 +792,14 @@ int numap_sampling_write_stop(struct numap_sampling_measure *measure) {
 
 int numap_sampling_end(struct numap_sampling_measure *measure) {
   int thread;
+
+  struct link_fd_measure* current_lfm;
+  while (link_fd_measure != NULL) {
+    current_lfm = link_fd_measure;
+    link_fd_measure = link_fd_measure->next;
+    free(current_lfm);
+  }
+
   for (thread = 0; thread < measure->nb_threads; thread++) {
     munmap(measure->metadata_pages_per_tid[thread], measure->mmap_len);
     close(measure->fd_per_tid[thread]);
