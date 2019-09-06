@@ -152,40 +152,40 @@ char *get_data_src_level(union perf_mem_data_src data_src) {
     free(old_res);
   } else if (data_src.mem_lvl & PERF_MEM_LVL_LOC_RAM) {
     old_res = res;
-    res = concat(res, "Local RAM");
+    res = concat(res, "Local_RAM");
     free(old_res);
   } else if (data_src.mem_lvl & PERF_MEM_LVL_REM_RAM1) {
     old_res = res;
-    res = concat(res, "Remote RAM 1 hop");
+    res = concat(res, "Remote_RAM_1_hop");
     free(old_res);
   } else if (data_src.mem_lvl & PERF_MEM_LVL_REM_RAM2) {
     old_res = res;
-    res = concat(res, "Remote RAM 2 hops");
+    res = concat(res, "Remote_RAM_2_hops");
     free(old_res);
   } else if (data_src.mem_lvl & PERF_MEM_LVL_REM_CCE1) {
     old_res = res;
-    res = concat(res, "Remote Cache 1 hop");
+    res = concat(res, "Remote_Cache_1_hop");
     free(old_res);
   } else if (data_src.mem_lvl & PERF_MEM_LVL_REM_CCE2) {
     old_res = res;
-    res = concat(res, "Remote Cache 2 hops");
+    res = concat(res, "Remote_Cache_2_hops");
     free(old_res);
   } else if (data_src.mem_lvl & PERF_MEM_LVL_IO) {
     old_res = res;
-    res = concat(res, "I/O Memory");
+    res = concat(res, "I/O_Memory");
     free(old_res);
   } else if (data_src.mem_lvl & PERF_MEM_LVL_UNC) {
     old_res = res;
-    res = concat(res, "Uncached Memory");
+    res = concat(res, "Uncached_Memory");
     free(old_res);
   }
   if (data_src.mem_lvl & PERF_MEM_LVL_HIT) {
     old_res = res;
-    res = concat(res, " Hit");
+    res = concat(res, "_Hit");
     free(old_res);
   } else if (data_src.mem_lvl & PERF_MEM_LVL_MISS) {
     old_res = res;
-    res = concat(res, " Miss");
+    res = concat(res, "_Miss");
     free(old_res);
   }
   return res;
