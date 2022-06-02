@@ -51,27 +51,51 @@ static void get_archi(unsigned int archi_id, struct archi * arch) {
   snprintf(arch->counting_write_event, 256, NOT_SUPPORTED);
 
   switch (archi_id)  {
+  case CPU_MODEL(6, 151):
+  case CPU_MODEL(6, 154):
+    snprintf(arch->name, 256, "Alder Lake micro arch");
+    /* Not tested. Let's assume these events are the same as the previous cpu generation */
+    snprintf(arch->sampling_read_event, 256, "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3");
+    snprintf(arch->sampling_write_event, 256, "MEM_INST_RETIRED:ALL_STORES");
+    break;
+
+  case CPU_MODEL(6, 167):
+    snprintf(arch->name, 256, "Rocket Lake micro arch");
+    /* Not tested. Let's assume these events are the same as the previous cpu generation */
+    snprintf(arch->sampling_read_event, 256, "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3");
+    snprintf(arch->sampling_write_event, 256, "MEM_INST_RETIRED:ALL_STORES");
+    break;
+
+  case CPU_MODEL(6, 141):
+  case CPU_MODEL(6, 140):
+    snprintf(arch->name, 256, "Tiger Lake micro arch");
+    /* Not tested. Let's assume these events are the same as the previous cpu generation */
+    snprintf(arch->sampling_read_event, 256, "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3");
+    snprintf(arch->sampling_write_event, 256, "MEM_INST_RETIRED:ALL_STORES");
+    break;
+
+  case CPU_MODEL(6, 125):
   case CPU_MODEL(6, 126):
     snprintf(arch->name, 256, "Ice Lake micro arch");
     /* Not tested. Let's assume these events are the same as the previous cpu generation */
     snprintf(arch->sampling_read_event, 256, "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3");
     snprintf(arch->sampling_write_event, 256, "MEM_INST_RETIRED:ALL_STORES");
     break;
-    
+
   case CPU_MODEL(6, 102):
     snprintf(arch->name, 256, "Cannon Lake micro arch");
     /* Not tested. Let's assume these events are the same as the previous cpu generation */
     snprintf(arch->sampling_read_event, 256, "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3");
     snprintf(arch->sampling_write_event, 256, "MEM_INST_RETIRED:ALL_STORES");
     break;
-    
+
   case CPU_MODEL(6, 158):
   case CPU_MODEL(6, 142):
     snprintf(arch->name, 256, "Kaby Lake micro arch");
     snprintf(arch->sampling_read_event, 256, "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3");
     snprintf(arch->sampling_write_event, 256, "MEM_INST_RETIRED:ALL_STORES");
     break;
-    
+
   case CPU_MODEL(6, 94):
   case CPU_MODEL(6, 78):
   case CPU_MODEL(6, 85):
@@ -79,7 +103,7 @@ static void get_archi(unsigned int archi_id, struct archi * arch) {
     snprintf(arch->sampling_read_event, 256, "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3");
     snprintf(arch->sampling_write_event, 256, "MEM_UOPS_RETIRED:ALL_STORES");
     break;
-    
+
   case CPU_MODEL(6, 79):
   case CPU_MODEL(6, 86):
   case CPU_MODEL(6, 71):
@@ -87,9 +111,8 @@ static void get_archi(unsigned int archi_id, struct archi * arch) {
     snprintf(arch->name, 256, "Broadwell micro arch");
     snprintf(arch->sampling_read_event, 256, "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3");
     snprintf(arch->sampling_write_event, 256, "MEM_UOPS_RETIRED:ALL_STORES");
-
     break;
-    
+
   case CPU_MODEL(6, 60):
   case CPU_MODEL(6, 63):
   case CPU_MODEL(6, 69):
@@ -98,7 +121,7 @@ static void get_archi(unsigned int archi_id, struct archi * arch) {
     snprintf(arch->sampling_read_event, 256, "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3");
     snprintf(arch->sampling_write_event, 256, "MEM_UOPS_RETIRED:ALL_STORES");
     break;
-    
+
   case CPU_MODEL(6, 58):
   case CPU_MODEL(6, 62):
     snprintf(arch->name, 256, "Ivy Bridge micro arch");
@@ -110,7 +133,7 @@ static void get_archi(unsigned int archi_id, struct archi * arch) {
     //snprintf(arch->sampling_read_event, 256, "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3");
     //snprintf(arch->sampling_write_event, 256, "MEM_TRANS_RETIRED:PRECISE_STORE");
     break;
-    
+
   case CPU_MODEL(6, 42):
   case CPU_MODEL(6, 45):
     snprintf(arch->name, 256, "Sandy Bridge micro arch");
@@ -142,7 +165,7 @@ static void get_archi(unsigned int archi_id, struct archi * arch) {
   case CPU_MODEL(6, 133):
     snprintf(arch->name, 256, "Knights Mill micro arch");
     break;
-    
+
   case CPU_MODEL(6, 87):
     snprintf(arch->name, 256, "Knights Landing micro arch");
     break;
