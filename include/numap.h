@@ -25,6 +25,7 @@
 struct numap_counting_measure {
   char started;
   int nb_nodes;
+  int is_valid[MAX_NB_NUMA_NODES];
   long fd_reads[MAX_NB_NUMA_NODES];
   long fd_writes[MAX_NB_NUMA_NODES];
   long long reads_count[MAX_NB_NUMA_NODES];
