@@ -339,9 +339,6 @@ __attribute__((constructor)) void init(void) {
         }
       }
       numa_bitmask_free(mask);
-      if (numa_node_to_cpu[node] == -1) {
-        nb_numa_nodes = -1; // to be handled properly
-      }
     }
   }
 
@@ -444,6 +441,9 @@ int numap_init(void) {
 int numap_counting_init_measure(struct numap_counting_measure *measure) {
 
   measure->nb_nodes = nb_numa_nodes;
+  for (int node = 0; node < nb_numa_nodes; node++) {
+    measure->is_valid[node] = (numa_node_to_cpu[node] != -1);
+  }
   measure->started = 0;
   return 0;
 }
@@ -509,22 +509,26 @@ int __numap_counting_start(struct numap_counting_measure *measure, struct perf_e
 
   // Open the events on each NUMA node with Linux system call
   for (int node = 0; node < measure->nb_nodes; node++) {
-    measure->fd_reads[node] = perf_event_open(pe_attr_read, -1, numa_node_to_cpu[node], -1, 0);
-    if (measure->fd_reads[node] == -1) {
-      return ERROR_PERF_EVENT_OPEN;
-    }
-    measure->fd_writes[node] = perf_event_open(pe_attr_write, -1, numa_node_to_cpu[node], -1, 0);
-    if (measure->fd_writes[node] == -1) {
-      return ERROR_PERF_EVENT_OPEN;
+    if (mesure->is_valid[node]) {
+      measure->fd_reads[node] = perf_event_open(pe_attr_read, -1, numa_node_to_cpu[node], -1, 0);
+      if (measure->fd_reads[node] == -1) {
+        return ERROR_PERF_EVENT_OPEN;
+      }
+      measure->fd_writes[node] = perf_event_open(pe_attr_write, -1, numa_node_to_cpu[node], -1, 0);
+      if (measure->fd_writes[node] == -1) {
+        return ERROR_PERF_EVENT_OPEN;
+      }
     }
   }
 
   // Starts measure
   for (int node = 0; node < measure->nb_nodes; node++) {
-    ioctl(measure->fd_reads[node], PERF_EVENT_IOC_RESET, 0);
-    ioctl(measure->fd_reads[node], PERF_EVENT_IOC_ENABLE, 0);
-    ioctl(measure->fd_writes[node], PERF_EVENT_IOC_RESET, 0);
-    ioctl(measure->fd_writes[node], PERF_EVENT_IOC_ENABLE, 0);
+    if (mesure->is_valid[node]) {
+      ioctl(measure->fd_reads[node], PERF_EVENT_IOC_RESET, 0);
+      ioctl(measure->fd_reads[node], PERF_EVENT_IOC_ENABLE, 0);
+      ioctl(measure->fd_writes[node], PERF_EVENT_IOC_RESET, 0);
+      ioctl(measure->fd_writes[node], PERF_EVENT_IOC_ENABLE, 0);
+    }
   }
 
   return 0;
@@ -568,18 +572,20 @@ int numap_counting_stop(struct numap_counting_measure *measure) {
   }
 
   for (int node = 0; node < nb_numa_nodes; node++) {
-    ioctl(measure->fd_reads[node], PERF_EVENT_IOC_DISABLE, 0);
-    ioctl(measure->fd_writes[node], PERF_EVENT_IOC_DISABLE, 0);
-    if(read(measure->fd_reads[node], &measure->reads_count[node],
-        sizeof(long long)) == -1) {
-      return ERROR_READ;
+    if (measure->is_valid[node]) {
+      ioctl(measure->fd_reads[node], PERF_EVENT_IOC_DISABLE, 0);
+      ioctl(measure->fd_writes[node], PERF_EVENT_IOC_DISABLE, 0);
+      if(read(measure->fd_reads[node], &measure->reads_count[node],
+            sizeof(long long)) == -1) {
+        return ERROR_READ;
+      }
+      if (read(measure->fd_writes[node], &measure->writes_count[node],
+            sizeof(long long)) == -1) {
+        return ERROR_READ;
+      }
+      close(measure->fd_reads[node]);
+      close(measure->fd_writes[node]);
     }
-    if (read(measure->fd_writes[node], &measure->writes_count[node],
-         sizeof(long long)) == -1) {
-      return ERROR_READ;
-    }
-    close(measure->fd_reads[node]);
-    close(measure->fd_writes[node]);
   }
 
   return 0;
