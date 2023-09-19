@@ -66,6 +66,13 @@ static void get_archi(unsigned int archi_id, struct archi * arch) {
     snprintf(arch->sampling_write_event, 256, "MEM_INST_RETIRED:ALL_STORES");
     break;
 
+  case CPU_MODEL(6, 143):
+    snprintf(arch->name, 256, "Sapphire Rapids micro arch");
+    /* Not tested. Let's assume these events are the same as the previous cpu generation */
+    snprintf(arch->sampling_read_event, 256, "MEM_TRANS_RETIRED:LOAD_LATENCY:ldlat=3");
+    snprintf(arch->sampling_write_event, 256, "MEM_INST_RETIRED:ALL_STORES");
+    break;
+
   case CPU_MODEL(6, 141):
   case CPU_MODEL(6, 140):
     snprintf(arch->name, 256, "Tiger Lake micro arch");
@@ -478,7 +485,7 @@ void refresh_wrapper_handler(int signum, siginfo_t *info, void* ucontext) {
 
 int numap_sampling_set_measure_handler(struct numap_sampling_measure *measure, void(*handler)(struct numap_sampling_measure*,int), int nb_refresh)
 {
-  // Has to be called before the mesure starts
+  // Has to be called before the measure starts
   if (measure->started != 0)
   {
     return ERROR_NUMAP_ALREADY_STARTED;
@@ -509,7 +516,7 @@ int __numap_counting_start(struct numap_counting_measure *measure, struct perf_e
 
   // Open the events on each NUMA node with Linux system call
   for (int node = 0; node < measure->nb_nodes; node++) {
-    if (mesure->is_valid[node]) {
+    if (measure->is_valid[node]) {
       measure->fd_reads[node] = perf_event_open(pe_attr_read, -1, numa_node_to_cpu[node], -1, 0);
       if (measure->fd_reads[node] == -1) {
         return ERROR_PERF_EVENT_OPEN;
@@ -523,7 +530,7 @@ int __numap_counting_start(struct numap_counting_measure *measure, struct perf_e
 
   // Starts measure
   for (int node = 0; node < measure->nb_nodes; node++) {
-    if (mesure->is_valid[node]) {
+    if (measure->is_valid[node]) {
       ioctl(measure->fd_reads[node], PERF_EVENT_IOC_RESET, 0);
       ioctl(measure->fd_reads[node], PERF_EVENT_IOC_ENABLE, 0);
       ioctl(measure->fd_writes[node], PERF_EVENT_IOC_RESET, 0);
