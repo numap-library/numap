@@ -81,6 +81,7 @@ static void get_archi(unsigned int archi_id, struct archi * arch) {
     snprintf(arch->sampling_write_event, 256, "MEM_INST_RETIRED:ALL_STORES");
     break;
 
+  case CPU_MODEL(6, 106):
   case CPU_MODEL(6, 125):
   case CPU_MODEL(6, 126):
     snprintf(arch->name, 256, "Ice Lake micro arch");
