@@ -249,11 +249,13 @@ show_event_info_combo(pfm_event_info_t *info)
 
     for (u = 1; u < total; u++) {
       len = sizeof(buf);
-      len -= snprintf(buf, len, "%s::%s", pinfo.name, info->name);
-      if (len <= 0) {
+      size_t bytes_written = snprintf(buf, len, "%s::%s", pinfo.name, info->name);
+      if (bytes_written >= len) {
 	fprintf(stderr, "event name too long%s", info->name);
 	goto end;
       }
+      len -=  bytes_written;
+
       for(m = u, j = 0; m; m >>=1, j++) {
 	if (m & 0x1ULL) {
 	  /* we have hit a non umasks attribute, skip */
